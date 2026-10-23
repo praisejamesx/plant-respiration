@@ -1,0 +1,365 @@
+{
+  "schema": "osmograph.domain-pack/1",
+  "id": "praisejamesx.plant-respiration",
+  "name": "Plant Respiration",
+  "version": "0.3.0",
+  "author": "@praisejamesx",
+  "license": "CC-BY-4.0",
+  "risk": "medium",
+  "domain": "plants",
+  "tagline": "Watch the plant, not just the number.",
+  "summary": "A weekly plant-health workspace that pairs array response with light, water, leaf, and root context — and states what the array cannot see.",
+  "whatItIs": "A structured log for one plant. It helps you notice a VOC or respiration change and correlate it with care, light, and visible symptoms.",
+  "whatItIsNot": "Not ethylene detection, not a pest or pathogen diagnosis, not a substitute for inspecting roots and leaves, and not a cross-rig claim.",
+  "citations": [
+    "Kesselmeier, J. & Staudt, M. (1999). Biogenic volatile organic compounds (VOC): an overview. Journal of Atmospheric Chemistry 33, 23–88.",
+    "Dicke, M. & Baldwin, I. T. (2010). The evolutionary context for herbivore-induced plant volatiles. Trends in Plant Science 15(3), 167–175."
+  ],
+  "widgets": [
+    {
+      "type": "hero",
+      "art": "plant",
+      "title": "Plant Respiration",
+      "subtitle": "A weekly change log with roots, leaves, and light in the frame.",
+      "note": "Example Vial · host-rendered · no executable code"
+    },
+    {
+      "type": "risk",
+      "level": "medium",
+      "headline": "A change signal is not a diagnosis.",
+      "body": "The array can notice that a plant’s volatile profile changed. It cannot tell you why. Check water, light, pests, roots, and recent moves.",
+      "always": [
+        "Record light, watering, and leaf condition with every sample.",
+        "Inspect the roots and the undersides of leaves.",
+        "Quarantine new plants before placing them near others."
+      ],
+      "never": [
+        "Never treat a sensor spike as a pest or disease identification.",
+        "Never assume the array can see ethylene; the current constants table has no ethylene response.",
+        "Never compare a plant’s reading to a different array or rig."
+      ]
+    },
+    {
+      "type": "metrics",
+      "title": "What this workspace is allowed to claim",
+      "items": [
+        {
+          "label": "Array can do",
+          "value": "Change detection",
+          "hint": "Same plant, same array, same time of day, against a baseline."
+        },
+        {
+          "label": "Array cannot do",
+          "value": "Ethylene / diagnosis",
+          "hint": "No ethylene channel and no pathogen or pest identification."
+        },
+        {
+          "label": "Best signal",
+          "value": "Context + trend",
+          "hint": "A single reading is weak; a weekly trend plus symptoms is stronger."
+        }
+      ]
+    },
+    {
+      "type": "diagram",
+      "art": "plant",
+      "title": "The plant, as a checklist",
+      "caption": "Click a point. The sensor is one clue; the plant body is the rest of the evidence.",
+      "hotspots": [
+        {
+          "id": "leaf",
+          "label": "Leaf surface",
+          "x": 33,
+          "y": 31,
+          "severity": "info",
+          "body": "Look for spots, curling, yellowing, sticky honeydew, webbing, or a change in leaf gloss. Check the underside, not just the top."
+        },
+        {
+          "id": "stem",
+          "label": "Stem",
+          "x": 50,
+          "y": 56,
+          "severity": "info",
+          "body": "Soft, black, or constricted stems are structural problems the array cannot name. Record them with the reading."
+        },
+        {
+          "id": "soil",
+          "label": "Soil / pot",
+          "x": 50,
+          "y": 78,
+          "severity": "warn",
+          "body": "Overwatering and poor drainage can look like a slow decline. Smell the soil, check moisture, and look for fungus gnats."
+        },
+        {
+          "id": "root",
+          "label": "Roots",
+          "x": 50,
+          "y": 90,
+          "severity": "warn",
+          "body": "Root rot can be invisible above the pot. If the plant is declining without an obvious leaf cause, inspect the root ball."
+        },
+        {
+          "id": "sensor",
+          "label": "Sensor",
+          "x": 76,
+          "y": 61,
+          "severity": "info",
+          "body": "Same array, same distance, same time of day. Temperature and humidity are confounds; log them. The array sees a VOC mixture, not ethylene."
+        }
+      ]
+    },
+    {
+      "type": "timeline",
+      "title": "A weekly rhythm",
+      "steps": [
+        {
+          "label": "Baseline",
+          "range": "Week 0",
+          "body": "Pick one plant and one location. Record light, watering, pot size, and leaf condition. Take a clean reference blank."
+        },
+        {
+          "label": "Weekly",
+          "range": "Week 1–4",
+          "body": "Sample at the same time of day. Log the reading with water, light, leaf, and soil notes."
+        },
+        {
+          "label": "Change",
+          "range": "Any week",
+          "body": "A spike or drop is a prompt to inspect. Look for pests, root problems, drafts, or a recent move before changing care."
+        },
+        {
+          "label": "Review",
+          "range": "Monthly",
+          "body": "Compare the trend, not one point. Re-baseline after a move, repot, or season change."
+        }
+      ]
+    },
+    {
+      "type": "tracking",
+      "title": "Plant log",
+      "description": "The plant name, care context, and symptoms are part of the measurement.",
+      "fields": [
+        {
+          "id": "plant",
+          "label": "Plant name",
+          "type": "text",
+          "placeholder": "Monstera by the window"
+        },
+        {
+          "id": "species",
+          "label": "Species",
+          "type": "text",
+          "placeholder": "Monstera deliciosa"
+        },
+        {
+          "id": "location",
+          "label": "Location",
+          "type": "text",
+          "placeholder": "north window, living room"
+        },
+        {
+          "id": "light",
+          "label": "Light",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "bright indirect",
+            "direct"
+          ]
+        }
+      ],
+      "logFields": [
+        {
+          "id": "date",
+          "label": "Date",
+          "type": "date"
+        },
+        {
+          "id": "smell",
+          "label": "Smell / respiration index",
+          "type": "number",
+          "placeholder": "0–10"
+        },
+        {
+          "id": "leaf",
+          "label": "Leaf note",
+          "type": "text",
+          "placeholder": "one yellow lower leaf"
+        },
+        {
+          "id": "soil",
+          "label": "Soil / water",
+          "type": "text",
+          "placeholder": "moist, watered 2 days ago"
+        },
+        {
+          "id": "action",
+          "label": "Action",
+          "type": "select",
+          "options": [
+            "none",
+            "inspect roots",
+            "isolate",
+            "adjust water",
+            "re-baseline"
+          ]
+        }
+      ],
+      "logLabel": "Add weekly reading"
+    },
+    {
+      "type": "chart",
+      "title": "Smell index trend",
+      "yLabel": "index",
+      "logField": "smell",
+      "demo": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 3.2
+        },
+        {
+          "x": 2,
+          "y": 4.8
+        },
+        {
+          "x": 3,
+          "y": 6.1
+        },
+        {
+          "x": 4,
+          "y": 5.9
+        }
+      ],
+      "note": "The line is your log. A rise is a prompt to inspect, not a diagnosis. The current array has no ethylene channel."
+    },
+    {
+      "type": "rules",
+      "title": "What to do with a change",
+      "rules": [
+        {
+          "when": "Sudden rise plus wilting",
+          "then": "Check water, heat, and root health. Isolate if pests are visible. Do not treat the number as the cause.",
+          "severity": "warn"
+        },
+        {
+          "when": "Gradual rise plus sticky leaves or webbing",
+          "then": "Inspect for pests, especially under the leaves. Do not spray blindly.",
+          "severity": "warn"
+        },
+        {
+          "when": "No change plus yellowing",
+          "then": "Look at roots, drainage, and light. The array may be blind to the cause.",
+          "severity": "info"
+        },
+        {
+          "when": "Sharp drop after moving indoors",
+          "then": "Re-baseline after the move. Do not compare readings across rooms or seasons.",
+          "severity": "info"
+        },
+        {
+          "when": "Suspected pesticide or toxic exposure",
+          "then": "Do not use smell as exposure measurement. Ventilate and seek appropriate guidance.",
+          "severity": "stop"
+        }
+      ]
+    },
+    {
+      "type": "checklist",
+      "title": "Before you change care",
+      "items": [
+        {
+          "id": "leaves",
+          "label": "Both leaf surfaces inspected",
+          "detail": "Pests often hide underneath."
+        },
+        {
+          "id": "roots",
+          "label": "Roots / drainage checked",
+          "detail": "If the plant is declining without a leaf cause."
+        },
+        {
+          "id": "water",
+          "label": "Water and light logged",
+          "detail": "Context is part of the measurement."
+        },
+        {
+          "id": "same",
+          "label": "Same array and time of day",
+          "detail": "Do not compare across rigs or rooms."
+        },
+        {
+          "id": "quarantine",
+          "label": "New plants quarantined",
+          "detail": "Do not let a new plant share air with the baseline plant."
+        },
+        {
+          "id": "rebaseline",
+          "label": "Re-baseline after a change",
+          "detail": "A move or repot invalidates the old baseline."
+        }
+      ]
+    },
+    {
+      "type": "docs",
+      "title": "Field notes"
+    },
+    {
+      "type": "rig",
+      "title": "Use this with your rig",
+      "body": "Record a clean reference blank and a plant sample on the same array and at the same time of day. Compare with Check. If the arrays differ, the app will refuse the comparison.",
+      "cta": "Open Check"
+    }
+  ],
+  "docs": [
+    {
+      "id": "how",
+      "title": "How to use this workspace",
+      "body": [
+        "Pick one plant and one location. Fill the plant fields, then add a weekly reading with the smell index, leaf, soil, water, and any action.",
+        "A reading is a prompt to look, not a diagnosis. The plant body and the care context are the evidence.",
+        "Use Check to compare the plant sample to a clean reference on the same array. A difference is a change signal, not an identification."
+      ]
+    },
+    {
+      "id": "sensor",
+      "title": "What the sensor is actually doing",
+      "body": [
+        "Plants emit a mixture of biogenic volatile organic compounds. Wounding, ripening, and stress can change that mixture. A MOX array sees a combined response, not a single compound.",
+        "The current constants table has no ethylene response, so the app cannot make an ethylene claim. Do not use it to decide whether fruit will ripen or whether a plant is emitting ethylene.",
+        "Humidity, temperature, distance, and the room’s background air all affect the reading. Log them."
+      ]
+    },
+    {
+      "id": "risk",
+      "title": "What can go wrong",
+      "body": [
+        "A change signal can be caused by watering, a draft, a new cleaning product, a person, or a different time of day. It is not specific to a pest or pathogen.",
+        "Pests and root problems can be present without a large VOC change. Inspect the plant.",
+        "A sensor that has drifted or been exposed to a strong VOC can report a change that is about the sensor, not the plant."
+      ]
+    },
+    {
+      "id": "validate",
+      "title": "How to validate a Vial on your rig",
+      "body": [
+        "Record a clean reference and at least three plant samples on the same array, at the same time of day, with the same distance.",
+        "Use Check to compare the reference and the plant. Read the lower bound and the permutation p-value.",
+        "A sealed Vial is a closed-set claim on the array that produced the evidence. It is not a diagnosis and it is not transferable to another rig."
+      ]
+    },
+    {
+      "id": "refs",
+      "title": "References",
+      "body": [
+        "Kesselmeier, J. & Staudt, M. (1999). Biogenic volatile organic compounds (VOC): an overview. Journal of Atmospheric Chemistry 33, 23–88.",
+        "Dicke, M. & Baldwin, I. T. (2010). The evolutionary context for herbivore-induced plant volatiles. Trends in Plant Science 15(3), 167–175.",
+        "These references describe plant VOC biology; they do not validate this Vial or turn a sensor response into a diagnosis."
+      ]
+    }
+  ]
+}
