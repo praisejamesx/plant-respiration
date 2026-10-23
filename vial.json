@@ -2,7 +2,7 @@
   "schema": "osmograph.domain-pack/1",
   "id": "praisejamesx.plant-respiration",
   "name": "Plant Respiration",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "@praisejamesx",
   "license": "CC-BY-4.0",
   "risk": "medium",
@@ -361,5 +361,52 @@
         "These references describe plant VOC biology; they do not validate this Vial or turn a sensor response into a diagnosis."
       ]
     }
-  ]
+  ],
+  "home": {
+    "headline": "The plant is the evidence; the array is a change detector.",
+    "detail": "Log light, water, leaf condition, and action with every sample. A change is a prompt to inspect, not a diagnosis.",
+    "metrics": [
+      {
+        "label": "Claim",
+        "value": "Change only",
+        "hint": "Same plant, same array, same time of day."
+      },
+      {
+        "label": "Blind spot",
+        "value": "Ethylene",
+        "hint": "No ethylene channel; no ripening, pest, or pathogen diagnosis."
+      },
+      {
+        "label": "Best signal",
+        "value": "Weekly trend",
+        "hint": "Context plus symptoms beats a single spike."
+      }
+    ],
+    "actions": [
+      {
+        "id": "workspace",
+        "label": "Open workspace",
+        "kind": "open-workspace"
+      },
+      {
+        "id": "check",
+        "label": "Compare with Check",
+        "kind": "open-check"
+      }
+    ],
+    "limits": [
+      "No ethylene channel and no pest or pathogen identification.",
+      "Readings do not transfer across arrays, rooms, or seasons.",
+      "A sensor spike is a prompt to inspect, not a diagnosis."
+    ],
+    "sources": [
+      "Kesselmeier & Staudt (1999), Journal of Atmospheric Chemistry 33: 23–88.",
+      "Dicke & Baldwin (2010), Trends in Plant Science 15(3): 167–175."
+    ]
+  },
+  "homeUi": {
+    "runtime": "sandbox/1",
+    "entry": "home.html",
+    "height": 420
+  }
 }

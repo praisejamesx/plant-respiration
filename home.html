@@ -1,0 +1,645 @@
+<style>
+.phome {
+  --tone: var(--line-strong);
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: 14px;
+  height: 100vh;
+  min-height: 420px;
+  padding: 12px 14px 14px;
+  background: var(--paper, #f7f2e8);
+  color: var(--ink, #2c2821);
+}
+.phome * { box-sizing: border-box; }
+.phome-context {
+  display: flex; flex-direction: column; gap: 8px;
+  min-height: 0; padding: 10px 11px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.phome-context h2 { margin: 1px 0 0; font-size: 17px; line-height: 1.1; letter-spacing: -.02em; }
+.phome-species { font-family: var(--mono); font-size: 8px; color: var(--muted-2); text-transform: uppercase; letter-spacing: .06em; }
+.phome-context dl { display: grid; gap: 6px; margin: 4px 0 0; }
+.phome-context dl div { display: grid; gap: 1px; padding-bottom: 5px; border-bottom: 1px solid var(--line); }
+.phome-context dt { font-family: var(--mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.phome-context dd { margin: 0; font-size: 10px; line-height: 1.35; color: var(--ink); overflow-wrap: anywhere; }
+.phome-claim {
+  margin-top: auto; padding: 7px 8px;
+  border-left: 3px solid var(--amber);
+  background: var(--amber-soft);
+  font-size: 9px; line-height: 1.4; color: var(--ink);
+}
+.phome-rhythm { font-family: var(--mono); font-size: 7px; line-height: 1.4; color: var(--muted-2); letter-spacing: .04em; text-transform: uppercase; }
+
+.phome-main { display: grid; grid-template-rows: auto auto minmax(180px, 1fr) auto; gap: 9px; min-width: 0; }
+.phome-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.phome-head h1 { margin: 2px 0 2px; font-size: 24px; line-height: 1.02; letter-spacing: -.03em; font-weight: 650; }
+.phome-head .sub { color: var(--muted); font-size: 10px; }
+.phome-actions { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+.phome-actions button { font-size: 9px; }
+.phome-stats { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; }
+.phome-stat { min-width: 84px; flex: 1; padding: 6px 8px; border: 1px solid var(--line); background: var(--panel); }
+.phome-stat .k { display: block; font-family: var(--mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.phome-stat .v { display: block; margin-top: 2px; font-family: var(--mono); font-size: 13px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.phome-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 7px; border: 1px solid var(--line-strong); border-radius: 999px;
+  font-family: var(--mono); font-size: 7px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); white-space: nowrap;
+}
+.phome-pill.good { color: var(--green); border-color: #9fceb9; background: var(--green-soft); }
+.phome-pill.warn { color: var(--amber); border-color: #e3c78a; background: var(--amber-soft); }
+.phome-pill.stop { color: var(--red); border-color: #e6b6bc; background: var(--red-soft); }
+.phome-pill.info { color: var(--cyan); border-color: #a8d4de; background: var(--cyan-soft); }
+
+.phome-trajectory {
+  position: relative; min-height: 180px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.phome-chart-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  flex: 0 0 auto; padding: 6px 8px 0;
+}
+.phome-chart-head .stamp { font-family: var(--mono); font-size: 7px; color: var(--muted-2); }
+.phome-source { display: flex; align-items: center; gap: 5px; }
+.phome-source select { max-width: 150px; font-size: 8px; }
+#liveChart { display: block; width: 100%; min-height: 90px; flex: 1 1 0; }
+.phome-track-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  flex: 0 0 auto; padding: 3px 8px 0; border-top: 1px solid var(--line);
+}
+#batchChart { display: block; width: 100%; height: 34px; flex: 0 0 34px; }
+
+.phome-bottom { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, 1fr); gap: 9px; align-items: start; }
+.phome-stack { display: grid; gap: 9px; min-width: 0; }
+.phome-status { padding: 7px 9px; border: 1px solid var(--line); border-left: 3px solid var(--tone); background: var(--panel); min-width: 0; }
+.phome-status.good { border-left-color: var(--green); }
+.phome-status.warn { border-left-color: var(--amber); }
+.phome-status.stop { border-left-color: var(--red); }
+.phome-status.info { border-left-color: var(--cyan); }
+.phome-status .label { font-size: 13px; font-weight: 650; line-height: 1.1; margin: 1px 0 2px; }
+.phome-status .copy { font-size: 9px; line-height: 1.4; color: var(--muted); }
+.phome-status .stamp { margin-top: 5px; font-family: var(--mono); font-size: 7px; color: var(--muted-2); line-height: 1.4; }
+
+.phome-watch { padding: 7px 9px; border: 1px solid var(--line); background: var(--panel); min-width: 0; }
+.phome-watch-limits { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0; }
+.phome-watch-limits label { display: grid; gap: 2px; min-width: 62px; }
+.phome-watch-limits .k { font-family: var(--mono); font-size: 7px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-2); white-space: nowrap; }
+.phome-watch-limits input { width: 100%; font-size: 9px; padding: 3px 4px; }
+.phome-watch-actions { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.phome-watch-actions .stamp { flex: 1 1 140px; font-family: var(--mono); font-size: 7px; color: var(--muted-2); line-height: 1.35; }
+
+.phome-quick { display: grid; grid-template-columns: 58px minmax(90px, 1fr) minmax(90px, 1fr); gap: 5px; align-items: end; padding: 7px 8px; border: 1px solid var(--line); background: var(--panel); }
+.phome-quick .wide { grid-column: 1 / -1; }
+.phome-quick label { min-width: 0; }
+.phome-quick .k { display: block; margin-bottom: 2px; font-family: var(--mono); font-size: 7px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-2); }
+.phome-quick input, .phome-quick select { width: 100%; font-size: 9px; padding: 4px 5px; }
+.phome-quick button { grid-column: 1 / -1; }
+@media (max-width: 820px) {
+  .phome { grid-template-columns: 1fr; height: auto; min-height: 0; }
+  .phome-context { order: 2; }
+  .phome-main { grid-template-rows: auto auto 150px auto; }
+  .phome-trajectory { min-height: 150px; }
+  .phome-bottom { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="phome">
+  <aside class="phome-context">
+    <div class="eyebrow">PLANT CONTEXT</div>
+    <h2 id="plantName">Unnamed plant</h2>
+    <div class="phome-species" id="plantSpecies">Species not set</div>
+    <dl>
+      <div><dt>Location</dt><dd id="ctxLocation">—</dd></div>
+      <div><dt>Light</dt><dd id="ctxLight">—</dd></div>
+      <div><dt>Last leaf note</dt><dd id="ctxLeaf">—</dd></div>
+      <div><dt>Soil / water</dt><dd id="ctxSoil">—</dd></div>
+      <div><dt>Last action</dt><dd id="ctxAction">—</dd></div>
+    </dl>
+    <div class="phome-claim"><b>No ethylene channel.</b> A change signal is not a pest, pathogen, or ripening diagnosis. Inspect the plant body.</div>
+    <div class="phome-rhythm">Weekly rhythm · same plant · same array · same time of day</div>
+  </aside>
+
+  <main class="phome-main">
+    <header class="phome-head">
+      <div>
+        <div class="eyebrow">PLANT RESPIRATION · HOME <span class="phome-pill" id="sourcePill">NO SENSOR</span></div>
+        <h1 id="plantHeadline">Plant cockpit</h1>
+        <div class="sub" id="plantSub">The plant is the evidence. The array is one change detector.</div>
+      </div>
+      <div class="phome-actions">
+        <button type="button" data-action="open-workspace">Workspace →</button>
+        <button type="button" data-action="open-check">Check</button>
+        <button type="button" data-action="export-log">Export log</button>
+        <button type="button" data-action="open-datasets">Datasets</button>
+      </div>
+    </header>
+
+    <div class="phome-stats">
+      <div class="phome-stat"><span class="k">Status</span><span class="v"><span class="phome-pill info" id="statusPill">NO BASELINE</span></span></div>
+      <div class="phome-stat"><span class="k">Plant day</span><span class="v" id="dayValue">—</span></div>
+      <div class="phome-stat"><span class="k">Last reading</span><span class="v" id="lastValue">—</span></div>
+      <div class="phome-stat"><span class="k">Readings</span><span class="v" id="logValue">0</span></div>
+    </div>
+
+    <section class="phome-trajectory" aria-label="Live array response">
+      <div class="phome-chart-head">
+        <span class="eyebrow">LIVE ARRAY RESPONSE · SAME PLANT</span>
+        <span class="phome-source"><select id="sourceSelect" aria-label="Sensor data source"></select><span class="stamp" id="seriesStamp">no live window</span></span>
+      </div>
+      <svg id="liveChart" viewBox="0 0 520 130" preserveAspectRatio="none" role="img" aria-label="Live baseline-relative array response"></svg>
+      <div class="phome-track-head">
+        <span class="eyebrow">TRACKED TRAJECTORY · HOST-PERSISTED</span>
+        <span class="stamp" id="trackStamp">not tracking</span>
+      </div>
+      <svg id="batchChart" viewBox="0 0 520 34" preserveAspectRatio="none" role="img" aria-label="Persisted trajectory of tracked fields"></svg>
+    </section>
+
+    <div class="phome-bottom">
+      <div class="phome-stack">
+        <section class="phome-status info" id="statusCard">
+          <div class="eyebrow">WHAT TO DO WITH A CHANGE</div>
+          <div class="label" id="statusLabel">No baseline</div>
+          <div class="copy" id="statusCopy">Add a reference reading for this plant. The array needs a clean baseline before a change means anything.</div>
+          <div class="stamp">A change is a prompt to inspect both leaf surfaces, soil, drainage, and roots. It is not an identification.</div>
+        </section>
+
+        <section class="phome-watch" id="watchCard">
+          <div class="phome-chart-head" style="padding-left:0;padding-right:0">
+            <span class="eyebrow">DOMAIN WATCH · THIS RIG</span>
+            <span class="phome-pill" id="watchPill">NOT CONFIGURED</span>
+          </div>
+          <div class="phome-watch-limits" id="watchLimits"><span class="stamp">No live channel limits yet. Connect the array and let the baseline settle.</span></div>
+          <div class="phome-watch-actions">
+            <button type="button" id="watchApply">Apply to host</button>
+            <button type="button" id="watchDisable">Disable</button>
+            <span class="stamp" id="watchNote">Default limit is 4× the measured coefficient of variation — a single-unit noise floor, not a biological threshold.</span>
+          </div>
+        </section>
+      </div>
+
+      <form class="phome-quick" id="quickLog">
+        <label><span class="k">Index 0–10</span><input name="smell" type="number" step="0.1" min="0" max="10" placeholder="—" /></label>
+        <label class="wide"><span class="k">Leaf note</span><input name="leaf" type="text" placeholder="one yellow lower leaf" /></label>
+        <label class="wide"><span class="k">Soil / water</span><input name="soil" type="text" placeholder="moist, watered 2 days ago" /></label>
+        <label><span class="k">Action</span><select name="action"><option value="none">none</option><option value="inspect roots">inspect roots</option><option value="isolate">isolate</option><option value="adjust water">adjust water</option><option value="re-baseline">re-baseline</option></select></label>
+        <label><span class="k">Date</span><input name="date" type="date" /></label>
+        <button class="primary" type="button" id="quickLogSubmit">Add weekly reading</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var bridge = window.osmograph;
+  var data = null;
+  var $ = function (sel) { return document.querySelector(sel); };
+  var SVG = "http://www.w3.org/2000/svg";
+
+  function num(v) {
+    if (v === null || v === undefined || v === "") return null;
+    var n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  function fieldValue(key) {
+    var f = data && data.domain && data.domain.fields ? data.domain.fields[key] : "";
+    return f === undefined || f === null ? "" : String(f);
+  }
+  function sortedLogs() {
+    if (!data || !data.domain || !data.domain.logs) return [];
+    return data.domain.logs.slice().sort(function (a, b) {
+      var da = a.values && a.values.date ? Date.parse(a.values.date) : NaN;
+      var db = b.values && b.values.date ? Date.parse(b.values.date) : NaN;
+      if (Number.isFinite(da) && Number.isFinite(db) && da !== db) return da - db;
+      return a.at - b.at;
+    });
+  }
+  function latestLog(logs) {
+    for (var i = logs.length - 1; i >= 0; i--) {
+      if (Object.keys(logs[i].values || {}).length) return logs[i];
+    }
+    return null;
+  }
+  function latestValue(logs, key) {
+    for (var i = logs.length - 1; i >= 0; i--) {
+      var v = num(logs[i].values[key]);
+      if (v !== null) return v;
+    }
+    return null;
+  }
+  function dateDay(value) {
+    if (!value) return null;
+    var d = new Date(String(value) + "T00:00:00");
+    return Number.isFinite(d.getTime()) ? d : null;
+  }
+  function plantDay(logs) {
+    if (!logs.length) return null;
+    var first = logs[0].values && logs[0].values.date ? Date.parse(logs[0].values.date) : logs[0].at;
+    if (!Number.isFinite(first)) return null;
+    return Math.max(0, Math.floor((Date.now() - first) / 86400000));
+  }
+  function fmtDate(value) {
+    var d = value ? new Date(value) : null;
+    if (!d || !Number.isFinite(d.getTime())) return "—";
+    return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  }
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+  function svgEl(name, attrs, text) {
+    var el = document.createElementNS(SVG, name);
+    if (attrs) Object.keys(attrs).forEach(function (k) { el.setAttribute(k, String(attrs[k])); });
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
+
+  function responseSeries(series) {
+    if (!series || !series.values) return [];
+    if (!series.response || !series.response.values) return normalizedSeries(series);
+    var values = series.response.values;
+    var length = 0;
+    values.forEach(function (channel) { length = Math.max(length, channel.length); });
+    var out = [];
+    for (var i = 0; i < length; i++) {
+      var sum = 0, n = 0;
+      values.forEach(function (channel) {
+        var v = channel[i];
+        if (v !== null && v !== undefined && Number.isFinite(v)) { sum += v; n++; }
+      });
+      if (n) out.push(sum / n);
+    }
+    return out.slice(-180);
+  }
+  function normalizedSeries(series) {
+    if (!series || !series.values || !series.values.length) return [];
+    var length = 0;
+    series.values.forEach(function (channel) { length = Math.max(length, channel.length); });
+    var z = [];
+    for (var i = 0; i < length; i++) z.push([]);
+    series.values.forEach(function (channel) {
+      var finite = channel.filter(function (v) { return v !== null && Number.isFinite(v); });
+      if (finite.length < 4) return;
+      var mean = finite.reduce(function (a, b) { return a + b; }, 0) / finite.length;
+      var variance = finite.reduce(function (a, b) { return a + (b - mean) * (b - mean); }, 0) / finite.length;
+      var sd = Math.sqrt(variance);
+      if (!Number.isFinite(sd) || sd < 1e-9) return;
+      channel.forEach(function (v, idx) {
+        if (v !== null && Number.isFinite(v)) z[idx].push((v - mean) / sd);
+      });
+    });
+    var out = [];
+    z.forEach(function (values) {
+      if (!values.length) return;
+      out.push(values.reduce(function (a, b) { return a + b; }, 0) / values.length);
+    });
+    return out.slice(-180);
+  }
+  function drawChart(series) {
+    var svg = $("#liveChart");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var rect = svg.getBoundingClientRect();
+    var W = Math.max(320, Math.round(rect.width || 520));
+    var H = Math.max(100, Math.round(rect.height || 130));
+    var L = 8, R = 8, T = 8, B = 16;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var line = responseSeries(series);
+    if (!line.length) {
+      svg.appendChild(svgEl("text", { x: W / 2, y: H / 2, "text-anchor": "middle", fill: "#8a7f6c", "font-size": 10 }, "No live window. The weekly log still works without a sensor."));
+      return;
+    }
+    var min = Math.min.apply(null, line);
+    var max = Math.max.apply(null, line);
+    var span = Math.max(1e-6, max - min);
+    var x = function (i) { return L + (i / Math.max(1, line.length - 1)) * (W - L - R); };
+    var y = function (v) { return T + (1 - (v - min) / span) * (H - T - B); };
+    for (var g = 0; g <= 3; g++) {
+      var yy = T + (g / 3) * (H - T - B);
+      svg.appendChild(svgEl("line", { x1: L, y1: yy, x2: W - R, y2: yy, stroke: "#e6dccd", "stroke-width": 1 }));
+    }
+    var zero = y(0);
+    if (zero >= T && zero <= H - B) {
+      svg.appendChild(svgEl("line", { x1: L, y1: zero, x2: W - R, y2: zero, stroke: "#b9ab95", "stroke-width": 1, "stroke-dasharray": "3 4" }));
+    }
+    var path = line.map(function (v, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); }).join(" ");
+    svg.appendChild(svgEl("path", { d: path + " L" + x(line.length - 1).toFixed(1) + " " + (H - B) + " L" + L + " " + (H - B) + " Z", fill: "rgba(14,116,144,.10)", stroke: "none" }));
+    svg.appendChild(svgEl("path", { d: path, fill: "none", stroke: "#0e7490", "stroke-width": 1.8, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    var lastX = x(line.length - 1), lastY = y(line[line.length - 1]);
+    svg.appendChild(svgEl("circle", { cx: lastX.toFixed(1), cy: lastY.toFixed(1), r: 3.2, fill: "#0e7490", stroke: "#fffdf8", "stroke-width": 1 }));
+    svg.appendChild(svgEl("text", { x: L, y: H - 3, fill: "#8a7f6c", "font-size": 8, "font-family": "monospace" }, (series && series.response ? "ΔR/R₀ (" + series.response.baseline + ") · mean of " + series.channels.length + " ch" : "z-scored mean · host has no declared transforms") + " · last " + line.length + " points"));
+  }
+  function renderSources() {
+    var select = $("#sourceSelect");
+    var sources = (data && data.sources) || [];
+    var wanted = sources.map(function (s) { return s.id; }).join("|");
+    var existing = Array.prototype.map.call(select.options, function (o) { return o.value; }).join("|");
+    if (existing !== wanted) {
+      select.textContent = "";
+      sources.forEach(function (s) {
+        var o = document.createElement("option");
+        o.value = s.id;
+        o.textContent = s.label;
+        select.appendChild(o);
+      });
+    }
+    if (data && data.selectedSource) select.value = data.selectedSource;
+  }
+
+  var transformsRequested = false;
+  var trajectoryRequested = false;
+  var watchSig = "";
+  function liveChannels() {
+    var snap = data && data.snapshot;
+    if (!snap || snap.source !== "live" || !snap.channelLimits) return [];
+    return (snap.channels || []).filter(function (c) {
+      var limit = snap.channelLimits[c.id];
+      return limit && !limit.dead;
+    });
+  }
+  function recommendedLimit(channelId) {
+    var snap = data && data.snapshot;
+    var limit = snap && snap.channelLimits ? snap.channelLimits[channelId] : null;
+    var cv = limit && Number.isFinite(limit.cv) ? limit.cv : 0;
+    return Math.max(0.02, Math.round(cv * 4 * 1000) / 1000);
+  }
+  function setPill(id, text, tone) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = "phome-pill" + (tone ? " " + tone : "");
+  }
+  function maybeDeclare() {
+    var snap = data && data.snapshot;
+    if (!snap || snap.source !== "live") return;
+    if (!transformsRequested && !(snap.transformsApplied || []).length && typeof bridge.setTransforms === "function") {
+      transformsRequested = true;
+      bridge.setTransforms({ baseline: "first-n", response: "delta-over-r0" });
+    }
+    var live = liveChannels();
+    if (!trajectoryRequested && live.length && !(snap.trajectory || []).length && typeof bridge.setTrajectory === "function") {
+      trajectoryRequested = true;
+      var fields = live.slice(0, 2).map(function (c) { return c.id; });
+      fields.push("anomaly.score");
+      bridge.setTrajectory({ fields: fields, intervalMs: 60000 });
+    }
+  }
+  function renderWatch() {
+    var snap = data && data.snapshot;
+    var box = $("#watchLimits");
+    var live = liveChannels();
+    if (!snap || snap.source !== "live" || !live.length) {
+      box.innerHTML = '<span class="stamp">No live channel limits yet. Connect the array and let the baseline settle.</span>';
+      setPill("watchPill", "NOT CONFIGURED", "");
+      return;
+    }
+    var sig = live.map(function (c) { return c.id; }).join(",");
+    if (sig !== watchSig) {
+      watchSig = sig;
+      box.textContent = "";
+      live.slice(0, 6).forEach(function (c) {
+        var label = document.createElement("label");
+        var k = document.createElement("span");
+        k.className = "k";
+        k.textContent = String(c.label || c.id).slice(0, 12);
+        var input = document.createElement("input");
+        input.type = "number";
+        input.step = "0.005";
+        input.min = "0";
+        input.dataset.channel = c.id;
+        input.value = String(recommendedLimit(c.id));
+        var limit = snap.channelLimits[c.id] || {};
+        input.title = c.id + " · 4× measured CV (cv=" + Number(limit.cv || 0).toFixed(4) + ")";
+        label.appendChild(k);
+        label.appendChild(input);
+        box.appendChild(label);
+      });
+    }
+    var config = snap.detectionConfig;
+    if (config && config.enabled) {
+      var detection = snap.detection;
+      if (detection && detection.active) {
+        setPill("watchPill", "CHANGE WATCH", "warn");
+        setText("watchNote", "Triggered: " + (detection.triggeredChannels || []).join(", ") + ". Inspect the plant; this is an array deviation, not a diagnosis.");
+      } else {
+        setPill("watchPill", "WATCH ON", "good");
+        setText("watchNote", "Armed on " + Object.keys(config.perChannelLimits || {}).length + " channel(s) · confidence floor " + Math.round((config.alertThreshold || 0) * 100) + "%. Same plant, same array.");
+      }
+    } else if (config && !config.enabled) {
+      setPill("watchPill", "WATCH OFF", "");
+      setText("watchNote", "Domain watch disabled. The host detector still runs; this only removes the Vial-declared limit.");
+    } else {
+      setPill("watchPill", "NOT CONFIGURED", "");
+      setText("watchNote", "Default limit is 4× the measured coefficient of variation — a single-unit noise floor, not a biological threshold.");
+    }
+  }
+  function applyWatch() {
+    var snap = data && data.snapshot;
+    if (!snap || snap.source !== "live") {
+      bridge.toast("Domain watch needs a live array.");
+      return;
+    }
+    var limits = {};
+    document.querySelectorAll("#watchLimits input[data-channel]").forEach(function (input) {
+      var value = Number(input.value);
+      if (Number.isFinite(value) && value > 0) limits[input.dataset.channel] = value;
+    });
+    if (!Object.keys(limits).length) {
+      bridge.toast("Enter at least one positive limit.");
+      return;
+    }
+    bridge.setDetection({ enabled: true, alertThreshold: 0.5, perChannelLimits: limits });
+  }
+  function disableWatch() {
+    var snap = data && data.snapshot;
+    var existing = snap && snap.detectionConfig ? snap.detectionConfig.perChannelLimits : null;
+    if (existing && Object.keys(existing).length) {
+      bridge.setDetection({ enabled: false, alertThreshold: 0.5, perChannelLimits: existing });
+      return;
+    }
+    var limits = {};
+    document.querySelectorAll("#watchLimits input[data-channel]").forEach(function (input) {
+      var value = Number(input.value);
+      if (Number.isFinite(value) && value > 0) limits[input.dataset.channel] = value;
+    });
+    if (!Object.keys(limits).length) {
+      bridge.toast("Nothing to disable — no live limit is armed.");
+      return;
+    }
+    bridge.setDetection({ enabled: false, alertThreshold: 0.5, perChannelLimits: limits });
+  }
+  function drawBatch() {
+    var svg = $("#batchChart");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var rect = svg.getBoundingClientRect();
+    var W = Math.max(320, Math.round(rect.width || 520));
+    var H = Math.max(30, Math.round(rect.height || 34));
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var points = (data && data.snapshot && data.snapshot.trajectory) || [];
+    if (!points.length) {
+      setText("trackStamp", "no points yet · host samples every 60 s once armed");
+      svg.appendChild(svgEl("text", { x: 8, y: H - 10, fill: "#8a7f6c", "font-size": 8, "font-family": "monospace" }, "Host-tracked trajectory starts when the baseline is ready."));
+      return;
+    }
+    var last = points[points.length - 1].values || {};
+    var key = Object.prototype.hasOwnProperty.call(last, "anomaly.score") ? "anomaly.score" : Object.keys(last)[0];
+    if (!key) {
+      setText("trackStamp", points.length + " points · no numeric field");
+      return;
+    }
+    var values = points.map(function (point) {
+      var v = point.values ? point.values[key] : null;
+      return Number.isFinite(v) ? v : null;
+    });
+    var finite = values.filter(function (v) { return v !== null; });
+    if (!finite.length) {
+      setText("trackStamp", points.length + " points · " + key + " empty");
+      return;
+    }
+    var min = Math.min.apply(null, finite);
+    var max = Math.max.apply(null, finite);
+    var span = Math.max(1e-9, max - min);
+    var L = 8, R = 8, T = 4, B = 10;
+    var x = function (i) { return L + (i / Math.max(1, values.length - 1)) * (W - L - R); };
+    var y = function (v) { return T + (1 - (v - min) / span) * (H - T - B); };
+    var path = "", started = false;
+    values.forEach(function (v, i) {
+      if (v === null) { started = false; return; }
+      path += (started ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1);
+      started = true;
+    });
+    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: "#e6dccd", "stroke-width": 1 }));
+    svg.appendChild(svgEl("path", { d: path, fill: "none", stroke: "#0e7490", "stroke-width": 1.4, "stroke-linejoin": "round" }));
+    var lastIndex = values.length - 1;
+    while (lastIndex >= 0 && values[lastIndex] === null) lastIndex--;
+    if (lastIndex >= 0) {
+      svg.appendChild(svgEl("circle", { cx: x(lastIndex).toFixed(1), cy: y(values[lastIndex]).toFixed(1), r: 2.4, fill: "#0e7490", stroke: "#fffdf8", "stroke-width": 1 }));
+    }
+    var minutes = Math.max(0, (points[points.length - 1].at - points[0].at) / 60000);
+    var duration = minutes >= 120 ? (minutes / 60).toFixed(1) + " h" : minutes >= 1 ? minutes.toFixed(0) + " min" : "<1 min";
+    setText("trackStamp", points.length + (points.length === 1 ? " pt · " : " pts · ") + key + " · " + duration + " · last " + (last[key] !== undefined ? Number(last[key]).toFixed(3) : "—"));
+  }
+
+  function quickStatus(logs) {
+    var snap = data && data.snapshot;
+    var anomaly = snap && snap.anomaly ? snap.anomaly.state : "unknown";
+    var last = latestLog(logs);
+    var action = last ? String(last.values.action || "").trim() : "";
+    if (!logs.length) {
+      return { tone: "info", label: "No baseline", copy: "Add a reference reading for this plant. The array needs a clean baseline before a change means anything." };
+    }
+    if (anomaly === "critical") {
+      return { tone: "stop", label: "Sustained change", copy: "The array sees a sustained deviation. Inspect both leaf surfaces, soil, drainage, and roots before changing care. This is not a diagnosis." };
+    }
+    if (anomaly === "warning") {
+      return { tone: "warn", label: "Change signal", copy: "A deviation is open. Check light, water, drafts, recent moves, and pests. The number is a prompt, not a cause." };
+    }
+    if (action === "isolate") {
+      return { tone: "warn", label: "Isolated", copy: "Keep this plant away from others. Re-baseline after treatment; old readings do not compare across the move." };
+    }
+    if (logs.length < 3) {
+      return { tone: "info", label: "More context needed", copy: "One reading is weak. Three weekly points with leaf, soil, and light notes are stronger than a single spike." };
+    }
+    if (action === "re-baseline") {
+      return { tone: "info", label: "Re-baseline requested", copy: "A move, repot, or treatment invalidates the old baseline. Start a clean reference on this array." };
+    }
+    return { tone: "good", label: "Watching", copy: "No sustained change on this array. Keep the weekly rhythm and record the context, not just the number." };
+  }
+
+  function render() {
+    if (!data) return;
+    var logs = sortedLogs();
+    var fields = (data.domain && data.domain.fields) || {};
+    var status = quickStatus(logs);
+    var last = latestLog(logs);
+    var day = plantDay(logs);
+    var index = latestValue(logs, "smell");
+
+    setText("plantName", fieldValue("plant") || "Unnamed plant");
+    setText("plantHeadline", fieldValue("plant") || "Plant cockpit");
+    setText("plantSpecies", fieldValue("species") || "Species not set");
+    setText("plantSub", [fieldValue("species"), fieldValue("location"), fieldValue("light")].filter(Boolean).join(" · ") || "The plant is the evidence. The array is one change detector.");
+    setText("ctxLocation", fieldValue("location") || "—");
+    setText("ctxLight", fieldValue("light") || "—");
+    setText("ctxLeaf", last ? String(last.values.leaf || "—") : "—");
+    setText("ctxSoil", last ? String(last.values.soil || "—") : "—");
+    setText("ctxAction", last ? String(last.values.action || "none") : "—");
+
+    setText("dayValue", day !== null ? "D" + day : "—");
+    setText("lastValue", last && last.values.date ? fmtDate(last.values.date) : last ? fmtDate(last.at) : "—");
+    setText("logValue", String(logs.length));
+
+    var pill = $("#statusPill");
+    pill.className = "phome-pill " + status.tone;
+    pill.textContent = status.label;
+    var card = $("#statusCard");
+    card.className = "phome-status " + status.tone;
+    setText("statusLabel", status.label);
+    setText("statusCopy", status.copy);
+
+    var sourcePill = $("#sourcePill");
+    sourcePill.textContent = data.series ? (data.series.source === "live" ? "LIVE ARRAY" : "RECORDING") : "NO SENSOR";
+    sourcePill.className = "phome-pill " + (data.series ? "good" : "");
+    setText("seriesStamp", data.series ? data.series.channels.length + " ch · " + String(data.series.label || "").slice(0, 24) : "no live window");
+    setText("watchNote", index !== null ? "Last logged index " + index.toFixed(1) + " / 10 — your note, not a sensor output." : "Default limit is 4× the measured coefficient of variation — a single-unit noise floor, not a biological threshold.");
+
+    renderSources();
+    drawChart(data.series);
+    maybeDeclare();
+    renderWatch();
+    drawBatch();
+    var dateInput = $("#quickLog [name=date]");
+    if (dateInput && !dateInput.value) {
+      dateInput.value = new Date().toISOString().slice(0, 10);
+    }
+  }
+
+  bridge.onData(function (payload) {
+    data = payload;
+    render();
+  });
+  document.querySelectorAll("[data-action]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      bridge.action({ type: button.dataset.action });
+    });
+  });
+  $("#sourceSelect").addEventListener("change", function (event) {
+    bridge.action({ type: "set-source", source: event.target.value });
+  });
+  function submitQuickLog() {
+    var formEl = $("#quickLog");
+    var form = new FormData(formEl);
+    var values = {};
+    form.forEach(function (value, key) {
+      if (String(value).trim()) values[key] = String(value).trim();
+    });
+    if (!Object.keys(values).length) {
+      bridge.toast("Add at least one value to the reading.");
+      return;
+    }
+    if (!values.date) values.date = new Date().toISOString().slice(0, 10);
+    bridge.action({ type: "add-log", values: values });
+    formEl.reset();
+    var dateInput = formEl.querySelector('[name="date"]');
+    if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
+  }
+  $("#quickLogSubmit").addEventListener("click", submitQuickLog);
+  $("#quickLog").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      submitQuickLog();
+    }
+  });
+  $("#watchApply").addEventListener("click", applyWatch);
+  $("#watchDisable").addEventListener("click", disableWatch);
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      if (data) { drawChart(data.series); drawBatch(); }
+    }).observe($("#liveChart"));
+  }
+  bridge.ready();
+})();
+</script>
