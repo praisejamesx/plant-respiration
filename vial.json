@@ -1,41 +1,51 @@
 {
-  "schema": "osmograph.domain-pack/1",
+  "schema": "osmograph.domain-pack/2",
   "id": "praisejamesx.plant-respiration",
   "name": "Plant Respiration",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "author": "@praisejamesx",
   "license": "CC-BY-4.0",
   "risk": "medium",
   "domain": "plants",
   "tagline": "Watch the plant, not just the number.",
-  "summary": "A weekly plant-health workspace that pairs array response with light, water, leaf, and root context — and states what the array cannot see.",
+  "summary": "A one-plant change monitor. It compares the host's baseline-relative response to each channel's measured noise, withholds the call when the enclosure moved, and keeps a session history for a same-time-of-day comparison.",
+  "scope": "Decide whether one plant's mixed-gas response on one array has moved beyond that array's own noise on this window, and keep the care context needed to interpret a change. It supports inspection; it does not identify a compound, a pest, a pathogen, or a care fault.",
+  "limits": [
+    "Same plant, same array, same enclosure, and the same time of day. A reading does not transfer across arrays, rooms, or seasons.",
+    "The response is a mixed gas signal. Water, light, temperature, humidity, handling, cleaning products, people, and sensor drift all move it.",
+    "No ethylene, CO₂, or compound channel. No pest, pathogen, or deficiency identification.",
+    "A quiet array does not clear a plant with visible symptoms, and a change is not a diagnosis."
+  ],
   "whatItIs": "A structured log for one plant. It helps you notice a VOC or respiration change and correlate it with care, light, and visible symptoms.",
   "whatItIsNot": "Not ethylene detection, not a pest or pathogen diagnosis, not a substitute for inspecting roots and leaves, and not a cross-rig claim.",
   "citations": [
     "Kesselmeier, J. & Staudt, M. (1999). Biogenic volatile organic compounds (VOC): an overview. Journal of Atmospheric Chemistry 33, 23–88.",
-    "Dicke, M. & Baldwin, I. T. (2010). The evolutionary context for herbivore-induced plant volatiles. Trends in Plant Science 15(3), 167–175."
+    "Dicke, M. & Baldwin, I. T. (2010). The evolutionary context for herbivore-induced plant volatiles: beyond the ‘cry for help’. Trends in Plant Science 15(3), 167–175.",
+    "Matsui, K. (2006). Green leaf volatiles: hydroperoxide lyase pathway of oxylipin metabolism. Current Opinion in Plant Biology 9(4), 409–415.",
+    "Caird, M. A., Richards, J. H. & Donovan, L. A. (2007). Nighttime stomatal conductance and transpiration in C3 and C4 plants. Plant Physiology 143(1), 4–10.",
+    "Barsan, N. & Weimar, U. (2003). Understanding the fundamental principles of metal oxide based gas sensors; the example of CO sensing with SnO2 sensors in the presence of humidity. Journal of Physics: Condensed Matter 15(20), R813–R839."
   ],
   "widgets": [
     {
       "type": "hero",
       "art": "plant",
       "title": "Plant Respiration",
-      "subtitle": "A weekly change log with roots, leaves, and light in the frame.",
-      "note": "Example Vial · host-rendered · no executable code"
+      "subtitle": "One plant, one array. A change beyond noise, with the care context attached.",
+      "note": "Example Vial · sandboxed UI · profile-declared detector"
     },
     {
       "type": "risk",
       "level": "medium",
       "headline": "A change signal is not a diagnosis.",
-      "body": "The array can notice that a plant’s volatile profile changed. It cannot tell you why. Check water, light, pests, roots, and recent moves.",
+      "body": "The array can notice that one plant’s volatile profile changed on this array. It cannot tell you why. Check water, light, pests, roots, and recent moves.",
       "always": [
         "Record light, watering, and leaf condition with every sample.",
-        "Inspect the roots and the undersides of leaves.",
-        "Quarantine new plants before placing them near others."
+        "Inspect the roots and the undersides of leaves before changing care.",
+        "Compare at the same time of day and re-baseline after a move."
       ],
       "never": [
-        "Never treat a sensor spike as a pest or disease identification.",
-        "Never assume the array can see ethylene; the current constants table has no ethylene response.",
+        "Never treat a sensor change as a pest or disease identification.",
+        "Never assume the array can see ethylene; there is no ethylene channel.",
         "Never compare a plant’s reading to a different array or rig."
       ]
     },
@@ -46,17 +56,17 @@
         {
           "label": "Array can do",
           "value": "Change detection",
-          "hint": "Same plant, same array, same time of day, against a baseline."
+          "hint": "Same plant, same array, same time of day, against that channel’s own noise."
         },
         {
           "label": "Array cannot do",
-          "value": "Ethylene / diagnosis",
-          "hint": "No ethylene channel and no pathogen or pest identification."
+          "value": "Ethylene / cause",
+          "hint": "No ethylene channel and no pest, pathogen, or care-fault identification."
         },
         {
           "label": "Best signal",
-          "value": "Context + trend",
-          "hint": "A single reading is weak; a weekly trend plus symptoms is stronger."
+          "value": "Sustained trend",
+          "hint": "A change that holds for most of the window, seen at the same time of day across sessions."
         }
       ]
     },
@@ -115,22 +125,22 @@
         {
           "label": "Baseline",
           "range": "Week 0",
-          "body": "Pick one plant and one location. Record light, watering, pot size, and leaf condition. Take a clean reference blank."
+          "body": "Pick one plant and one location. Record light, watering, pot size, and leaf condition. Let the host form a ready baseline on this array."
         },
         {
           "label": "Weekly",
           "range": "Week 1–4",
-          "body": "Sample at the same time of day. Log the reading with water, light, leaf, and soil notes."
+          "body": "Sample at the same time of day. Save a session with the change index and enclosure readings, then log water, light, and leaf notes."
         },
         {
           "label": "Change",
           "range": "Any week",
-          "body": "A spike or drop is a prompt to inspect. Look for pests, root problems, drafts, or a recent move before changing care."
+          "body": "A sustained change is a prompt to inspect. Look for pests, root problems, drafts, or a recent move before changing care."
         },
         {
           "label": "Review",
           "range": "Monthly",
-          "body": "Compare the trend, not one point. Re-baseline after a move, repot, or season change."
+          "body": "Compare the session trend, not one point. Re-baseline after a move, repot, or season change."
         }
       ]
     },
@@ -176,10 +186,10 @@
           "type": "date"
         },
         {
-          "id": "smell",
-          "label": "Smell / respiration index",
+          "id": "change",
+          "label": "Change index (%)",
           "type": "number",
-          "placeholder": "0–10"
+          "placeholder": "from the session save"
         },
         {
           "id": "leaf",
@@ -209,45 +219,16 @@
       "logLabel": "Add weekly reading"
     },
     {
-      "type": "chart",
-      "title": "Smell index trend",
-      "yLabel": "index",
-      "logField": "smell",
-      "demo": [
-        {
-          "x": 0,
-          "y": 3
-        },
-        {
-          "x": 1,
-          "y": 3.2
-        },
-        {
-          "x": 2,
-          "y": 4.8
-        },
-        {
-          "x": 3,
-          "y": 6.1
-        },
-        {
-          "x": 4,
-          "y": 5.9
-        }
-      ],
-      "note": "The line is your log. A rise is a prompt to inspect, not a diagnosis. The current array has no ethylene channel."
-    },
-    {
       "type": "rules",
       "title": "What to do with a change",
       "rules": [
         {
-          "when": "Sudden rise plus wilting",
+          "when": "Sustained rise plus wilting",
           "then": "Check water, heat, and root health. Isolate if pests are visible. Do not treat the number as the cause.",
           "severity": "warn"
         },
         {
-          "when": "Gradual rise plus sticky leaves or webbing",
+          "when": "Sustained rise plus sticky leaves or webbing",
           "then": "Inspect for pests, especially under the leaves. Do not spray blindly.",
           "severity": "warn"
         },
@@ -311,26 +292,38 @@
     {
       "type": "rig",
       "title": "Use this with your rig",
-      "body": "Record a clean reference blank and a plant sample on the same array and at the same time of day. Compare with Check. If the arrays differ, the app will refuse the comparison.",
-      "cta": "Open Check"
+      "body": "Let the host form a ready baseline on the same array, at the same distance, with the enclosure closed. Save a session at the same time of day. The workspace withholds the change call while the baseline is warming or the enclosure moved.",
+      "cta": "Open workspace"
     }
   ],
   "docs": [
     {
       "id": "how",
-      "title": "How to use this workspace",
+      "title": "How the change call is made",
       "body": [
-        "Pick one plant and one location. Fill the plant fields, then add a weekly reading with the smell index, leaf, soil, water, and any action.",
-        "A reading is a prompt to look, not a diagnosis. The plant body and the care context are the evidence.",
-        "Use Check to compare the plant sample to a clean reference on the same array. A difference is a change signal, not an identification."
+        "The host applies the profile’s baseline and response transform. The workspace reads the baseline-relative response (value minus R0, over R0) from the host and never recomputes a hidden baseline of its own.",
+        "For every live channel it compares the response to twice that channel’s coefficient of variation over the raw window. A response inside that band is not evidence of a change; a response outside it is a change on this array.",
+        "A change is called only when it holds for most of the recent window. One excursion is treated as handling, a door, or a draft.",
+        "If temperature moved 1.5 °C or more, or humidity moved 5 %RH or more, during the window, the change call is withheld. A MOX response is temperature- and humidity-sensitive, so the change cannot be attributed to the plant."
+      ]
+    },
+    {
+      "id": "protocol",
+      "title": "The measurement protocol",
+      "body": [
+        "One plant, one location, one enclosure, one array. Keep the distance and the sampling time the same; stomatal state follows the light cycle, so a different clock time is a different measurement.",
+        "Let the array equilibrate. The profile waits 180 s before it trusts a baseline and uses the first 60 s after that for R0.",
+        "Record the enclosure temperature and humidity with every session. If you cannot keep them steady, the honest result is “uninformative”, not “no change”.",
+        "Re-baseline after a move, a repot, a season change, or a sensor swap."
       ]
     },
     {
       "id": "sensor",
       "title": "What the sensor is actually doing",
       "body": [
-        "Plants emit a mixture of biogenic volatile organic compounds. Wounding, ripening, and stress can change that mixture. A MOX array sees a combined response, not a single compound.",
-        "The current constants table has no ethylene response, so the app cannot make an ethylene claim. Do not use it to decide whether fruit will ripen or whether a plant is emitting ethylene.",
+        "Plants emit a mixture of biogenic volatile organic compounds. Wounding, ripening, and stress can change that mixture. A MOX array sees a combined, cross-sensitive response, not a single compound.",
+        "Metal-oxide sensors respond to humidity and temperature as well as to reducing gases. That is why the workspace refuses a change call when the enclosure moved.",
+        "There is no ethylene channel, so the app cannot make an ethylene claim. Do not use it to decide whether fruit will ripen.",
         "Humidity, temperature, distance, and the room’s background air all affect the reading. Log them."
       ]
     },
@@ -340,16 +333,17 @@
       "body": [
         "A change signal can be caused by watering, a draft, a new cleaning product, a person, or a different time of day. It is not specific to a pest or pathogen.",
         "Pests and root problems can be present without a large VOC change. Inspect the plant.",
-        "A sensor that has drifted or been exposed to a strong VOC can report a change that is about the sensor, not the plant."
+        "A sensor that has drifted or been exposed to a strong VOC can report a change that is about the sensor, not the plant.",
+        "A dead or saturated channel is excluded from the change index. If every channel is dead, the workspace says so instead of reporting a quiet plant."
       ]
     },
     {
-      "id": "validate",
-      "title": "How to validate a Vial on your rig",
+      "id": "profile",
+      "title": "The profile is a starting point, not evidence",
       "body": [
-        "Record a clean reference and at least three plant samples on the same array, at the same time of day, with the same distance.",
-        "Use Check to compare the reference and the plant. Read the lower bound and the permutation p-value.",
-        "A sealed Vial is a closed-set claim on the array that produced the evidence. It is not a diagnosis and it is not transferable to another rig."
+        "The declared profile uses a 180 s warmup, a 60 s R0 window, a three-sample median, delta-over-R0 response, and a 90 s warning persistence with 25% hysteresis. Those values are reasoned defaults for a slow plant process on a small MOX array.",
+        "They have not been measured against a held-out plant dataset. The Vial therefore installs as Ungated and is not listed as reviewed evidence.",
+        "If you collect a held-out report, add it to the evidence block. Do not describe these defaults as validated numbers."
       ]
     },
     {
@@ -358,28 +352,78 @@
       "body": [
         "Kesselmeier, J. & Staudt, M. (1999). Biogenic volatile organic compounds (VOC): an overview. Journal of Atmospheric Chemistry 33, 23–88.",
         "Dicke, M. & Baldwin, I. T. (2010). The evolutionary context for herbivore-induced plant volatiles. Trends in Plant Science 15(3), 167–175.",
-        "These references describe plant VOC biology; they do not validate this Vial or turn a sensor response into a diagnosis."
+        "Matsui, K. (2006). Green leaf volatiles: hydroperoxide lyase pathway of oxylipin metabolism. Current Opinion in Plant Biology 9(4), 409–415.",
+        "Caird, M. A., Richards, J. H. & Donovan, L. A. (2007). Nighttime stomatal conductance and transpiration in C3 and C4 plants. Plant Physiology 143(1), 4–10.",
+        "Barsan, N. & Weimar, U. (2003). Metal oxide gas sensors in the presence of humidity. Journal of Physics: Condensed Matter 15(20), R813–R839.",
+        "These references describe plant VOC biology and MOX cross-sensitivity. They do not validate this Vial or turn a sensor response into a diagnosis."
       ]
     }
   ],
+  "capabilities": [
+    "read:live",
+    "read:baseline",
+    "log:events",
+    "write:persist",
+    "action:request",
+    "export:data"
+  ],
+  "anomaly": {
+    "baseline": {
+      "protocol": "first-n",
+      "warmupS": 180,
+      "r0WindowS": 60
+    },
+    "transforms": {
+      "conditioning": [
+        "median3"
+      ],
+      "response": "delta-over-r0"
+    },
+    "detection": {
+      "enabled": true,
+      "sensitivity": 1,
+      "minChannels": 2,
+      "levelBudget": 0,
+      "levelRefS": 0,
+      "alertThreshold": 0.6,
+      "perChannelLimits": {},
+      "hysteresis": 0.25,
+      "escalation": {
+        "warningS": 90,
+        "criticalS": 600,
+        "emergencyS": 1800,
+        "resetNormalS": 900
+      },
+      "farTargetPerMonth": null
+    },
+    "admissibility": {
+      "requireBaseline": "ready",
+      "minCoverage": 0.8
+    }
+  },
+  "ui": {
+    "runtime": "sandbox/1",
+    "entry": "ui.html",
+    "height": 1040
+  },
   "home": {
     "headline": "The plant is the evidence; the array is a change detector.",
-    "detail": "Log light, water, leaf condition, and action with every sample. A change is a prompt to inspect, not a diagnosis.",
+    "detail": "The workspace compares the baseline-relative response to each channel’s own noise, withholds the call when the enclosure moved, and keeps a same-time-of-day session history.",
     "metrics": [
       {
         "label": "Claim",
-        "value": "Change only",
-        "hint": "Same plant, same array, same time of day."
+        "value": "Change beyond noise",
+        "hint": "Same plant, same array, same time of day, and a steady enclosure."
       },
       {
         "label": "Blind spot",
-        "value": "Ethylene",
-        "hint": "No ethylene channel; no ripening, pest, or pathogen diagnosis."
+        "value": "Ethylene / cause",
+        "hint": "No ethylene channel; no ripening, pest, pathogen, or care-fault identification."
       },
       {
         "label": "Best signal",
-        "value": "Weekly trend",
-        "hint": "Context plus symptoms beats a single spike."
+        "value": "Sustained trend",
+        "hint": "A change that holds for most of the window and repeats across sessions."
       }
     ],
     "actions": [
@@ -395,13 +439,15 @@
       }
     ],
     "limits": [
-      "No ethylene channel and no pest or pathogen identification.",
+      "No ethylene channel and no pest, pathogen, or care-fault identification.",
       "Readings do not transfer across arrays, rooms, or seasons.",
-      "A sensor spike is a prompt to inspect, not a diagnosis."
+      "A change is a prompt to inspect, not a diagnosis; a quiet array does not clear visible symptoms."
     ],
     "sources": [
       "Kesselmeier & Staudt (1999), Journal of Atmospheric Chemistry 33: 23–88.",
-      "Dicke & Baldwin (2010), Trends in Plant Science 15(3): 167–175."
+      "Dicke & Baldwin (2010), Trends in Plant Science 15(3): 167–175.",
+      "Matsui (2006), Current Opinion in Plant Biology 9(4): 409–415.",
+      "Barsan & Weimar (2003), Journal of Physics: Condensed Matter 15(20): R813–R839."
     ]
   },
   "homeUi": {

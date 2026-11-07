@@ -1,0 +1,1156 @@
+<style>
+.plant { max-width: 1360px; margin: 0 auto; padding: 14px 16px 30px; display: grid; gap: 10px; }
+.plant-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.plant-head h1 { margin: 2px 0 3px; font-size: 23px; letter-spacing: -.02em; }
+.plant-head .sub { color: var(--muted); font-size: 11px; max-width: 68ch; }
+.plant-pills { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+.pill { font-family: var(--mono); font-size: 8px; letter-spacing: .09em; text-transform: uppercase; border: 1px solid var(--line-strong); padding: 4px 7px; color: var(--muted); background: var(--panel); white-space: nowrap; }
+.pill.live { color: var(--cyan); border-color: #7fc3d2; background: var(--cyan-soft); }
+.pill.warn { color: var(--amber); border-color: #ddb98a; background: var(--amber-soft); }
+.pill.quiet { color: var(--muted); }
+.pill.stop { color: var(--red); border-color: #f7dede; background: var(--red-soft); }
+
+.call { border: 1px solid var(--line); border-left: 3px solid var(--line-strong); background: var(--panel); padding: 10px 12px; display: grid; gap: 3px; }
+.call.live { border-left-color: var(--cyan); }
+.call.warn { border-left-color: var(--amber); }
+.call.stop { border-left-color: var(--red); }
+.call-label { font-size: 17px; font-weight: 650; letter-spacing: -.01em; line-height: 1.15; }
+.call-body { color: var(--muted); font-size: 11px; line-height: 1.5; max-width: 90ch; }
+.call-do { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--line); font-size: 10.5px; }
+.call-do b { font-family: var(--mono); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-2); display: block; margin-bottom: 1px; }
+
+.plant-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(330px, 1fr); gap: 10px; align-items: start; }
+@media (max-width: 1000px) { .plant-grid { grid-template-columns: minmax(0, 1fr); } }
+.col { display: grid; gap: 10px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); padding: 10px 11px; min-width: 0; }
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.card-head h2 { margin: 0; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.stamp { font-family: var(--mono); font-size: 8px; color: var(--muted-2); }
+.chart-wrap { position: relative; border: 1px solid var(--line); background: var(--panel-2); }
+#liveChart { display: block; width: 100%; height: 262px; }
+.chart-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted-2); font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; pointer-events: none; text-align: center; padding: 0 24px; }
+.toolbar { display: flex; gap: 6px; flex-wrap: wrap; align-items: end; margin-top: 7px; }
+.toolbar label { min-width: 92px; }
+.small { font-size: 10px; color: var(--muted); line-height: 1.5; }
+.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.metric { border: 1px solid var(--line); background: var(--panel-2); padding: 7px 8px; }
+.metric .k { font-family: var(--mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.metric .v { font-family: var(--mono); font-size: 17px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.metric .u { font-size: 8px; color: var(--muted-2); margin-left: 3px; }
+.metric.wide { grid-column: 1 / -1; }
+.metric.flag .v { color: var(--amber); }
+
+.chans { width: 100%; border-collapse: collapse; font-size: 10px; }
+.chans th { text-align: left; font-family: var(--mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; font-weight: 400; padding: 0 4px 4px; border-bottom: 1px solid var(--line); }
+.chans td { padding: 4px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.chans td.num { text-align: right; font-family: var(--mono); }
+.chans tr.dead td { color: var(--muted-2); }
+.chans .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--line-strong); margin-right: 4px; vertical-align: middle; }
+.chans .dot.moved { background: var(--amber); }
+.chans .dot.quiet { background: var(--cyan); }
+.chans .dot.dead { background: var(--line-strong); }
+
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.form .wide { grid-column: 1 / -1; }
+.form button { grid-column: 1 / -1; }
+.log-list { display: grid; gap: 4px; max-height: 210px; overflow: auto; margin-top: 7px; }
+.log-row { display: grid; grid-template-columns: 78px 62px minmax(0, 1fr); gap: 6px; border-top: 1px solid var(--line); padding-top: 4px; font-size: 10px; }
+.log-row .t { font-family: var(--mono); font-size: 8px; color: var(--muted-2); }
+.log-row .k { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--muted); }
+.log-empty { color: var(--muted-2); font-size: 10px; padding: 6px 0; }
+
+.session-wrap { border: 1px solid var(--line); background: var(--panel-2); }
+#sessionChart { display: block; width: 100%; height: 64px; }
+.session-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 6px; font-size: 10px; }
+.session-row .delta { font-family: var(--mono); font-size: 12px; }
+.delta.up { color: var(--amber); }
+.delta.down { color: var(--cyan); }
+.delta.flat { color: var(--muted-2); }
+
+.note { border-left: 3px solid var(--amber); background: var(--amber-soft); padding: 8px 9px; font-size: 10.5px; line-height: 1.55; }
+.note strong { font-family: var(--mono); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+.note.cyan { border-left-color: var(--cyan); background: var(--cyan-soft); }
+.actions { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+
+/* Diurnal comparison */
+.diurnal-wrap { border: 1px solid var(--line); background: var(--panel-2); padding: 9px 10px; margin-bottom: 10px; }
+.diurnal-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.diurnal-head h2 { margin: 0; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.diurnal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.diurnal-cell { border: 1px solid var(--line); background: var(--panel); padding: 7px 8px; }
+.diurnal-cell .k { font-family: var(--mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.diurnal-cell .v { font-family: var(--mono); font-size: 15px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+/* Channel history sparklines */
+.history-wrap { border: 1px solid var(--line); background: var(--panel-2); padding: 9px 10px; margin-bottom: 10px; }
+.history-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.history-head h2 { margin: 0; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.history-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+.history-cell { border: 1px solid var(--line); background: var(--panel); padding: 8px; }
+.history-cell .name { font-family: var(--mono); font-size: 8px; color: var(--muted-2); margin-bottom: 4px; }
+.history-cell canvas { width: 100%; height: 56px; display: block; }
+.history-cell .v { font-family: var(--mono); font-size: 14px; margin-top: 3px; }
+
+/* Unified journal */
+.journal-wrap { border: 1px solid var(--line); background: var(--panel-2); }
+.journal-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+.journal-head h2 { margin: 0; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.journal-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.journal-filters button { font: inherit; font-size: 8px; padding: 3px 7px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; }
+.journal-filters button.active { background: var(--cyan-soft); border-color: var(--cyan); color: var(--cyan); }
+.journal-list { display: grid; gap: 3px; max-height: 220px; overflow: auto; }
+.journal-row { display: grid; grid-template-columns: 86px 78px minmax(0, 1fr) 60px; gap: 6px; border-top: 1px solid var(--line); padding: 4px 0; font-size: 9px; }
+.journal-row .t { font-family: var(--mono); font-size: 8px; color: var(--muted-2); }
+.journal-row .kind { font-family: var(--mono); font-size: 7px; text-transform: uppercase; color: var(--muted); }
+.journal-row .body { color: var(--ink); font-size: 9.5px; line-height: 1.3; }
+.journal-row .meta { font-family: var(--mono); font-size: 8px; color: var(--muted-2); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Interpretation */
+.interpret-wrap { border: 1px solid var(--line); background: var(--panel-2); padding: 9px 10px; }
+.interpret-head { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.interpret-item { border-left: 3px solid var(--line-strong); background: var(--panel); padding: 7px 9px; margin-bottom: 5px; font-size: 10px; line-height: 1.45; }
+.interpret-item.warn { border-left-color: var(--amber); }
+.interpret-item.info { border-left-color: var(--cyan); }
+.interpret-item .label { font-family: var(--mono); font-size: 8px; font-weight: 600; text-transform: uppercase; margin-bottom: 2px; }
+.interpret-item .body { color: var(--muted); }
+.interpret-item .action { margin-top: 3px; font-size: 9px; color: var(--ink); }
+</style>
+
+<div class="plant">
+  <header class="plant-head">
+    <div>
+      <div class="eyebrow">Plant respiration · one plant, one array</div>
+      <h1 id="plantHeadline">Has this plant moved beyond its own noise?</h1>
+      <div class="sub">The host applies your profile's baseline and response transform. This screen compares that response to each channel's measured noise, withholds the call when the enclosure changed, and keeps a session history. It does not identify a compound, a pest, or a pathogen.</div>
+    </div>
+    <div class="plant-pills">
+      <span class="pill" id="sourcePill">NO INPUT</span>
+      <span class="pill" id="baselinePill">BASELINE —</span>
+      <span class="pill" id="detectPill">DETECTOR —</span>
+    </div>
+  </header>
+
+  <section class="call" id="call">
+    <div class="call-label" id="callLabel">Waiting for the host</div>
+    <div class="call-body" id="callBody">Connect an array or replay a recording. The screen stays empty rather than inventing a baseline.</div>
+    <div class="call-do" id="callDo"><b>Do this</b><span>Start a live session and take a clean reference.</span></div>
+  </section>
+
+  <div class="plant-grid">
+    <div class="col">
+      <section class="card">
+        <div class="card-head"><h2>Baseline-relative response</h2><span class="stamp" id="chartStamp">waiting for the host</span></div>
+        <div class="chart-wrap">
+          <canvas id="liveChart" width="760" height="262"></canvas>
+          <div class="chart-empty" id="chartEmpty">No live window yet</div>
+        </div>
+        <div class="toolbar">
+          <label>Channel<select id="channelSelect"></select></label>
+          <label>Window<select id="windowSelect"><option value="60">60 s</option><option value="180" selected>3 min</option><option value="600">10 min</option></select></label>
+          <button type="button" id="pauseBtn">Pause chart</button>
+          <button type="button" id="exportBtn">Export journal</button>
+        </div>
+        <p class="small" style="margin:7px 0 0">The line is <span class="mono">(value − R0) / R0</span> per the profile, not concentration. The shaded band is ±2× this channel's coefficient of variation — its own noise floor. A line inside the band is not evidence of a change.</p>
+      </section>
+
+      <section class="card channel-history-card">
+        <div class="card-head"><h2>Channel verdicts</h2><span class="stamp" id="chanStamp">—</span></div>
+        <table class="chans">
+          <thead><tr><th>Channel</th><th class="num">Response</th><th class="num">Noise band</th><th class="num">Ratio</th><th>Verdict</th></tr></thead>
+          <tbody id="chanBody"><tr><td colspan="5" class="small">No channels yet.</td></tr></tbody>
+        </table>
+      </section>
+
+      <!-- Diurnal comparison -->
+      <section class="card">
+        <div class="diurnal-wrap">
+          <div class="diurnal-head"><h2>Same time of day</h2><span class="stamp" id="diurnalStamp">—</span></div>
+          <div class="diurnal-grid" id="diurnalGrid">
+            <div class="diurnal-cell"><div class="k">Earlier sessions</div><div class="v" id="diurnalCount">0</div></div>
+            <div class="diurnal-cell"><div class="k">Median change index</div><div class="v" id="diurnalMedian">—</div></div>
+            <div class="diurnal-cell"><div class="k">Current vs median</div><div class="v" id="diurnalVsMedian">—</div></div>
+          </div>
+          <p class="small" style="margin-top:6px">Compares the current window's change index to earlier sessions taken within ±2 hours of the same clock time. Stomatal state follows the light cycle — a different time of day is a different measurement.</p>
+        </div>
+      </section>
+
+      <!-- Channel history sparklines -->
+      <section class="card history-wrap">
+        <div class="history-head"><h2>Channel history</h2><span class="stamp">Change index per session</span></div>
+        <div class="history-grid" id="historyGrid">
+          <div class="history-cell"><div class="name" id="histName0">—</div><canvas id="histSpark0" width="160" height="56"></canvas><div class="v" id="histVal0">—</div></div>
+          <div class="history-cell"><div class="name" id="histName1">—</div><canvas id="histSpark1" width="160" height="56"></canvas><div class="v" id="histVal1">—</div></div>
+          <div class="history-cell"><div class="name" id="histName2">—</div><canvas id="histSpark2" width="160" height="56"></canvas><div class="v" id="histVal2">—</div></div>
+          <div class="history-cell"><div class="name" id="histName3">—</div><canvas id="histSpark3" width="160" height="56"></canvas><div class="v" id="histVal3">—</div></div>
+        </div>
+        <p class="small" style="margin-top:6px">Each sparkline shows one channel's change index across saved sessions, oldest to newest. Flat lines mean nothing moved; a rising trend means the plant's volatile profile is shifting on this array.</p>
+      </section>
+
+    </div>
+
+    <div class="col">
+      <section class="card">
+        <div class="card-head"><h2>This window</h2><span class="stamp" id="metricStamp">—</span></div>
+        <div class="metrics">
+          <div class="metric"><div class="k">Change index</div><div class="v" id="mIndex">—</div></div>
+          <div class="metric"><div class="k">Moved channels</div><div class="v" id="mMoved">—</div></div>
+          <div class="metric"><div class="k">Sustained</div><div class="v" id="mSustained">—</div></div>
+          <div class="metric"><div class="k">Noise band</div><div class="v" id="mBand">—</div></div>
+          <div class="metric wide" id="envMetric"><div class="k">Enclosure Δ</div><div class="v" id="mEnv" style="font-size:12px;line-height:1.45">—</div></div>
+        </div>
+      </section>
+
+      <!-- Interpretation panel -->
+      <section class="card interpret-wrap">
+        <div class="interpret-head">What the change could mean</div>
+        <div id="interpretGrid">
+          <div class="interpret-item info"><div class="label">No change detected</div><div class="body">No live channel is beyond twice its measured coefficient of variation, sustained.</div><div class="action">Keep the routine. A quiet array does not clear a plant with visible symptoms.</div></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Plant context</h2><span class="stamp">saved on this device</span></div>
+        <form class="form" id="contextForm">
+          <label>Plant<input name="plant" type="text" placeholder="basil by the window" /></label>
+          <label>Species<input name="species" type="text" placeholder="Ocimum basilicum" /></label>
+          <label>Light regime<input name="light" type="text" placeholder="south window, 6 h direct" /></label>
+          <label>Last watered<input name="watered" type="date" /></label>
+          <label>Pot / substrate<input name="roots" type="text" placeholder="terracotta, damp, no smell" /></label>
+          <label>Leaf note<input name="leaf" type="text" placeholder="one yellow lower leaf" /></label>
+          <button type="button" class="primary" id="saveContext">Save context</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Session history</h2><span class="stamp" id="sessionStamp">0 sessions</span></div>
+        <div class="session-wrap"><canvas id="sessionChart" width="320" height="64"></canvas></div>
+        <div class="session-row"><span id="sessionVs">No earlier session to compare.</span><span class="delta flat" id="sessionDelta">—</span></div>
+        <div class="actions">
+          <button type="button" class="primary" id="saveSession">Save session</button>
+        </div>
+        <p class="small" style="margin:6px 0 0">Saved sessions store the change index, band, enclosure readings, and clock time. The comparison only means something at the same time of day and the same enclosure.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Care log</h2><span class="stamp">what you did to the plant</span></div>
+        <form class="form" id="careForm">
+          <label>Action
+            <select name="kind">
+              <option value="water">watered</option>
+              <option value="light">moved / changed light</option>
+              <option value="feed">fed</option>
+              <option value="prune">pruned / repotted</option>
+              <option value="clean">cleaned the room</option>
+              <option value="inspect">inspected</option>
+              <option value="other">other</option>
+            </select>
+          </label>
+          <label>Date<input name="date" type="date" /></label>
+          <label class="wide">Note<input name="note" type="text" placeholder="watered 200 ml, no runoff" /></label>
+          <button type="button" class="primary" id="addCare">Log care</button>
+        </form>
+        <p class="small" style="margin:6px 0 0">A care event is context for the next window, not a cause. It is written to the same journal and export as the sessions.</p>
+      </section>
+
+      <section class="card journal-wrap">
+        <div class="journal-head"><h2>Journal</h2><span class="stamp" id="journalStamp">0 events</span></div>
+        <div class="journal-filters">
+          <button type="button" class="active" data-filter="all">all</button>
+          <button type="button" data-filter="care">care</button>
+          <button type="button" data-filter="context">context</button>
+          <button type="button" data-filter="session">session</button>
+        </div>
+        <div class="journal-list" id="journalList"><div class="log-empty">No events yet.</div></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>What this cannot see</strong>
+    The response is a mixed gas signal. Water stress, light, temperature, handling, a cleaning product, a person, and sensor drift all move it. It cannot separate those causes, cannot identify a VOC, and has no channel that turns a response into an ethylene, CO₂, pest, or pathogen claim. Inspect the plant; treat a change as a reason to look, not a diagnosis.
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var HOST = window.__OSMOGRAPH_VIAL_HOST__;
+  var bridge = window.osmograph;
+  var $ = function (id) { return document.getElementById(id); };
+  var state = {
+    series: null,
+    snapshot: null,
+    recent: [],
+    rows: [],
+    env: null,
+    index: null,
+    band: null,
+    moved: 0,
+    sustained: 0,
+    confounded: false,
+    channel: 0,
+    windowSec: 180,
+    paused: false,
+    sessions: [],
+    context: {},
+    journal: [],
+    journalFilter: "all",
+    lastRenderHeight: 0
+  };
+  var raf = 0;
+
+  function sendResize() {
+    if (!bridge) return;
+    var h = Math.ceil(document.documentElement.scrollHeight);
+    if (h > 0 && Math.abs(h - state.lastRenderHeight) > 8) {
+      state.lastRenderHeight = h;
+      bridge.action({ type: "resize", height: h });
+    }
+  }
+
+  function finite(v) { return typeof v === "number" && isFinite(v); }
+  function num(v) { return finite(v) ? v : null; }
+  function media(values) {
+    var f = values.filter(finite).sort(function (a, b) { return a - b; });
+    if (!f.length) return null;
+    var m = Math.floor(f.length / 2);
+    return f.length % 2 ? f[m] : (f[m - 1] + f[m]) / 2;
+  }
+  function lastFinite(list) {
+    if (!list) return null;
+    for (var i = list.length - 1; i >= 0; i--) if (finite(list[i])) return list[i];
+    return null;
+  }
+  function pct(v, digits) {
+    return finite(v) ? (v * 100).toFixed(digits === undefined ? 1 : digits) + "%" : "—";
+  }
+  function setText(id, value) { var el = $(id); if (el) el.textContent = value; }
+  function setPill(id, text, cls) {
+    var el = $(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = "pill" + (cls ? " " + cls : "");
+  }
+  function today() { return new Date().toISOString().slice(0, 10); }
+  function hourOf(ts) {
+    var d = new Date(ts);
+    return d.getHours() + d.getMinutes() / 60;
+  }
+  function clockHour(h) {
+    var hh = Math.floor(((h % 24) + 24) % 24);
+    var mm = Math.round((h - Math.floor(h)) * 60);
+    if (mm === 60) { mm = 0; hh = (hh + 1) % 24; }
+    return (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm;
+  }
+  function scheduleRender() {
+    if (raf) return;
+    raf = window.requestAnimationFrame(function () { raf = 0; renderAll(); });
+  }
+
+  function readState() {
+    if (!HOST) return false;
+    try { state.series = HOST.getSeries(); } catch (e) { state.series = null; }
+    try { state.snapshot = HOST.getSnapshot(); } catch (e) { state.snapshot = null; }
+    try { state.recent = HOST.getRecentReadings(900) || []; } catch (e) { state.recent = []; }
+    return true;
+  }
+
+  function envWindow(windowSec) {
+    var cutoff = Date.now() - windowSec * 1000;
+    var rows = state.recent.filter(function (r) { return r && r.timestamp >= cutoff && r.env; });
+    var temps = rows.map(function (r) { return num(r.env.temperature); }).filter(function (v) { return v !== null; });
+    var rhs = rows.map(function (r) { return num(r.env.humidity); }).filter(function (v) { return v !== null; });
+    if (!temps.length && !rhs.length) return { temp: null, rh: null, n: 0 };
+    return {
+      temp: temps.length > 1 ? temps[temps.length - 1] - temps[0] : 0,
+      rh: rhs.length > 1 ? rhs[rhs.length - 1] - rhs[0] : 0,
+      n: rows.length
+    };
+  }
+
+  function channelRows() {
+    var snapshot = state.snapshot;
+    var series = state.series;
+    var chans = (snapshot && snapshot.channels) || [];
+    var response = series && series.response ? series.response.values : null;
+    var rows = [];
+    for (var i = 0; i < chans.length; i++) {
+      var id = chans[i].id || ("ch" + i);
+      var limit = snapshot.channelLimits ? snapshot.channelLimits[id] : null;
+      var cv = limit && finite(limit.cv) ? Math.abs(limit.cv) : null;
+      var dead = !!(limit && limit.dead) || chans[i].health === "stuck" || chans[i].health === "saturated";
+      var band = cv === null ? null : Math.max(0.005, 2 * cv);
+      var row = response && response[i] ? response[i] : null;
+      var now = row ? lastFinite(row) : null;
+      var sustained = false;
+      if (row && band !== null) {
+        var tail = row.slice(Math.max(0, Math.floor(row.length * 0.7))).filter(finite);
+        if (tail.length >= 5) {
+          var hits = tail.filter(function (v) { return Math.abs(v) >= band; }).length;
+          sustained = hits / tail.length >= 0.6;
+        }
+      }
+      rows.push({
+        index: i,
+        id: id,
+        label: chans[i].label || id,
+        dead: dead,
+        cv: cv,
+        band: band,
+        response: now,
+        ratio: now !== null && band ? Math.abs(now) / band : null,
+        moved: !dead && now !== null && band !== null && Math.abs(now) >= band,
+        sustained: sustained
+      });
+    }
+    return rows;
+  }
+
+  function compute() {
+    state.rows = channelRows();
+    var live = state.rows.filter(function (r) { return !r.dead; });
+    var moved = live.filter(function (r) { return r.moved; });
+    var sustained = moved.filter(function (r) { return r.sustained; });
+    state.moved = moved.length;
+    state.sustained = sustained.length;
+    state.index = media(live.map(function (r) { return r.response === null ? null : Math.abs(r.response); }).filter(function (v) { return v !== null; }));
+    state.band = media(live.map(function (r) { return r.band; }).filter(function (v) { return v !== null; }));
+    state.env = envWindow(state.windowSec);
+    state.confounded = (state.env.temp !== null && Math.abs(state.env.temp) >= 1.5)
+      || (state.env.rh !== null && Math.abs(state.env.rh) >= 5);
+    if (state.channel >= state.rows.length) state.channel = 0;
+  }
+
+  // Diurnal comparison: sessions within ±2 hours of same clock time
+  function diurnalStats() {
+    var now = Date.now();
+    var todayHour = hourOf(now);
+    var matches = state.sessions.filter(function (s) {
+      if (!finite(s.index)) return false;
+      // A session saved seconds ago is the one on screen, not an "earlier"
+      // session at this time of day.
+      if (finite(s.at) && now - s.at < 5 * 60 * 1000) return false;
+      var sh = finite(s.hour) ? s.hour : null;
+      if (sh === null) return false;
+      var diff = Math.abs(sh - todayHour);
+      // wrap around midnight
+      if (diff > 12) diff = 24 - diff;
+      return diff <= 2;
+    });
+    var count = matches.length;
+    var median = count ? media(matches.map(function (s) { return s.index; })) : null;
+    var vsMedian = (median !== null && state.index !== null) ? (state.index - median) : null;
+    return { count: count, median: median, vsMedian: vsMedian };
+  }
+
+  function evaluate() {
+    var snapshot = state.snapshot;
+    var series = state.series;
+    if (!series) {
+      return {
+        tone: "", label: "No live window",
+        body: "The host has not produced a window yet. Connect an array or replay a recording; the screen stays empty rather than inventing a baseline.",
+        action: "Start a live session and let the host form a baseline."
+      };
+    }
+    if (series.source !== "live") {
+      return {
+        tone: "", label: "Captured buffer, not a live plant",
+        body: "These bytes are a stored capture, so the change call is disabled. The chart is shown for inspection only.",
+        action: "Replay a recording to inspect it, or connect the array for a live call."
+      };
+    }
+    if (!snapshot || !snapshot.baseline) {
+      return { tone: "", label: "No host state", body: "The host snapshot is missing.", action: "Reload the Vial." };
+    }
+    if (snapshot.baseline.state === "warming") {
+      return {
+        tone: "", label: "Baseline forming — " + Math.round((snapshot.baseline.progress || 0) * 100) + "%",
+        body: "The profile will not compare until the baseline is ready. An alarm cannot fire yet, and neither can a change call.",
+        action: "Hold the enclosure steady. Do not move the plant or open the room."
+      };
+    }
+    if (snapshot.baseline.state !== "ready") {
+      return { tone: "", label: "No baseline", body: "The host has not established a reference for this array.", action: "Run a clean reference on this array first." };
+    }
+    var live = state.rows.filter(function (r) { return !r.dead; });
+    if (!live.length) {
+      return { tone: "warn", label: "The array is not measuring", body: "Every channel is flagged dead, stuck, or saturated. A flat line here is a sensor fault, not a quiet plant.", action: "Check the rig, the channel health, and the sensor contact." };
+    }
+    if (state.index === null) {
+      return { tone: "", label: "No response yet", body: "The profile transform has not produced a finite response on any live channel.", action: "Wait for one more window, or check that the profile transform is being applied." };
+    }
+    if (snapshot.detection && snapshot.detection.admissible === false) {
+      return {
+        tone: "warn", label: "Detector not admissible",
+        body: snapshot.detection.reason || "The profile refuses to arm: the baseline or channel coverage is outside its declared gate.",
+        action: "Restore the declared baseline and channel coverage before reading the detector."
+      };
+    }
+    if (state.confounded) {
+      var parts = [];
+      if (state.env.temp !== null && Math.abs(state.env.temp) >= 1.5) parts.push("temperature " + (state.env.temp > 0 ? "+" : "") + state.env.temp.toFixed(1) + " °C");
+      if (state.env.rh !== null && Math.abs(state.env.rh) >= 5) parts.push("humidity " + (state.env.rh > 0 ? "+" : "") + state.env.rh.toFixed(0) + " %RH");
+      return {
+        tone: "warn", label: "Enclosure moved — call withheld",
+        body: "During this window the " + parts.join(" and ") + " changed more than the threshold. A MOX response is temperature- and humidity-sensitive, so this change cannot be attributed to the plant.",
+        action: "Stabilise the enclosure and re-take the window before drawing a conclusion."
+      };
+    }
+    if (state.sustained > 0) {
+      return {
+        tone: "warn", label: "Sustained change on " + state.sustained + " channel" + (state.sustained === 1 ? "" : "s"),
+        body: "The response stayed beyond each channel's own noise band for most of the recent window, on a live array with a ready baseline. That is a real change on this array; it is not a cause.",
+        action: "Inspect the plant: water, light, leaf undersides, roots, and any recent move. Log what you find before changing care."
+      };
+    }
+    if (state.moved > 0) {
+      return {
+        tone: "", label: "One excursion, not sustained",
+        body: "At least one channel crossed its noise band, but not for most of the window. A single excursion is usually handling, a door, or a draft.",
+        action: "Watch the next window. Do not change care on one excursion."
+      };
+    }
+    return {
+      tone: "live", label: "Within the array's own noise floor",
+      body: "No live channel is beyond twice its measured coefficient of variation, sustained. On this array, at this time, the plant has not moved beyond noise.",
+      action: "Keep the routine. A quiet array does not clear a plant with visible symptoms — inspect those directly."
+    };
+  }
+
+  // Interpretation: likely causes for sustained change
+  function interpretation() {
+    var items = [];
+    if (state.sustained > 0) {
+      items.push({
+        tone: "warn",
+        label: "Sustained change on this array",
+        body: state.sustained + " channel" + (state.sustained === 1 ? "" : "s") + " held beyond its own noise band for most of the window.",
+        action: "Inspect water, light, leaf undersides, roots, and any recent move before changing care."
+      });
+      if (state.confounded) {
+        items.push({
+          tone: "warn",
+          label: "Confounded by enclosure",
+          body: "Temperature or humidity moved during the window, so the change cannot be attributed to the plant.",
+          action: "Stabilise the enclosure and re-take the window."
+        });
+      }
+      var diurnal = diurnalStats();
+      if (diurnal.count > 0) {
+        items.push({
+          tone: diurnal.vsMedian !== null && Math.abs(diurnal.vsMedian) > (state.band || 0) ? "warn" : "info",
+          label: "Same time of day",
+          body: diurnal.count + " earlier session" + (diurnal.count === 1 ? "" : "s") + " at this clock time. Median change index " + (diurnal.median !== null ? pct(diurnal.median) : "—") + "." + (diurnal.vsMedian !== null ? " Current is " + (diurnal.vsMedian >= 0 ? "+" : "") + pct(diurnal.vsMedian) + " vs median." : ""),
+          action: diurnal.vsMedian !== null && Math.abs(diurnal.vsMedian) > (state.band || 0) ? "The change is unusual for this time of day — treat as a real prompt." : "The change is within normal diurnal variation for this time of day."
+        });
+      } else {
+        items.push({
+          tone: "info",
+          label: "No same-time baseline",
+          body: "No earlier sessions at this clock time to compare against.",
+          action: "Save sessions at the same time of day to build a diurnal baseline."
+        });
+      }
+    } else {
+      items.push({
+        tone: "info",
+        label: "No change detected",
+        body: "No live channel is beyond twice its measured coefficient of variation, sustained.",
+        action: "Keep the routine. A quiet array does not clear a plant with visible symptoms — inspect those directly."
+      });
+    }
+    return items;
+  }
+
+  function renderVerdict() {
+    var v = evaluate();
+    var call = $("call");
+    call.className = "call" + (v.tone ? " " + v.tone : "");
+    setText("callLabel", v.label);
+    setText("callBody", v.body);
+    var doEl = $("callDo");
+    doEl.textContent = "";
+    var b = document.createElement("b");
+    b.textContent = "Do this";
+    var span = document.createElement("span");
+    span.textContent = v.action;
+    doEl.appendChild(b);
+    doEl.appendChild(span);
+  }
+
+  function renderStatus() {
+    var series = state.series;
+    var snapshot = state.snapshot;
+    var live = !!series && series.source === "live";
+    setPill("sourcePill", live ? "LIVE ARRAY" : (series ? "CAPTURED BUFFER" : "NO INPUT"), live ? "live" : "");
+    var baseline = snapshot && snapshot.baseline ? snapshot.baseline : null;
+    if (!baseline || baseline.state === "none") setPill("baselinePill", "BASELINE —", "");
+    else if (baseline.state === "ready") setPill("baselinePill", "BASELINE READY", "live");
+    else setPill("baselinePill", "BASELINE " + String(baseline.state).toUpperCase() + " " + Math.round((baseline.progress || 0) * 100) + "%", "warn");
+    var det = snapshot ? snapshot.detection : null;
+    if (!det) setPill("detectPill", baseline && baseline.state === "ready" ? "DETECTOR PENDING" : "DETECTOR —", "");
+    else if (det.admissible === false) setPill("detectPill", "DETECTOR REFUSED", "warn");
+    else if (det.active) setPill("detectPill", "DETECTOR ACTIVE", "warn");
+    else setPill("detectPill", "DETECTOR QUIET", "quiet");
+  }
+
+  function renderMetrics() {
+    setText("mIndex", state.index === null ? "—" : pct(state.index));
+    setText("mMoved", state.rows.length ? state.moved + "/" + state.rows.filter(function (r) { return !r.dead; }).length : "—");
+    setText("mSustained", state.rows.length ? String(state.sustained) : "—");
+    setText("mBand", state.band === null ? "—" : pct(state.band));
+    var env = state.env || {};
+    var bits = [];
+    if (env.temp !== null && env.temp !== undefined) bits.push("temp " + (env.temp > 0 ? "+" : "") + env.temp.toFixed(1) + " °C");
+    if (env.rh !== null && env.rh !== undefined) bits.push("RH " + (env.rh > 0 ? "+" : "") + env.rh.toFixed(0) + "%");
+    setText("mEnv", bits.length ? bits.join(" · ") + (state.confounded ? " · confounded" : "") : "no temperature or humidity series");
+    var metric = $("envMetric");
+    if (metric) metric.className = "metric wide" + (state.confounded ? " flag" : "");
+    var channel = state.rows[state.channel];
+    setText("metricStamp", channel ? channel.label : "—");
+    setText("chanStamp", state.rows.length + " ch · " + state.rows.filter(function (r) { return r.dead; }).length + " dead");
+    setText("chartStamp", channel
+      ? channel.label + " · " + state.windowSec + " s" + (state.series && state.series.response ? " · baseline-relative" : " · raw (no transform)")
+      : "no channels declared");
+  }
+
+  function renderChannelSelect() {
+    var select = $("channelSelect");
+    var signature = state.rows.map(function (r) { return r.id + ":" + r.label; }).join("|");
+    if (select.dataset.signature === signature) return;
+    select.dataset.signature = signature;
+    select.textContent = "";
+    state.rows.forEach(function (row) {
+      var option = document.createElement("option");
+      option.value = String(row.index);
+      option.textContent = row.label + (row.dead ? " (dead)" : "");
+      select.appendChild(option);
+    });
+    if (!state.rows.length) {
+      var option = document.createElement("option");
+      option.value = "0";
+      option.textContent = "no channels";
+      select.appendChild(option);
+    }
+  }
+
+  function renderChannelTable() {
+    var body = $("chanBody");
+    body.textContent = "";
+    if (!state.rows.length) {
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      td.colSpan = 5;
+      td.className = "small";
+      td.textContent = "No channels yet.";
+      tr.appendChild(td);
+      body.appendChild(tr);
+      return;
+    }
+    state.rows.forEach(function (row) {
+      var tr = document.createElement("tr");
+      if (row.dead) tr.className = "dead";
+      var name = document.createElement("td");
+      var dot = document.createElement("span");
+      dot.className = "dot " + (row.dead ? "dead" : row.moved ? "moved" : "quiet");
+      name.appendChild(dot);
+      name.appendChild(document.createTextNode(row.label));
+      tr.appendChild(name);
+      var resp = document.createElement("td");
+      resp.className = "num";
+      resp.textContent = row.dead ? "—" : pct(row.response);
+      tr.appendChild(resp);
+      var band = document.createElement("td");
+      band.className = "num";
+      band.textContent = row.band === null ? "—" : pct(row.band, 2);
+      tr.appendChild(band);
+      var ratio = document.createElement("td");
+      ratio.className = "num";
+      ratio.textContent = row.ratio === null ? "—" : row.ratio.toFixed(2) + "×";
+      tr.appendChild(ratio);
+      var verdict = document.createElement("td");
+      verdict.textContent = row.dead ? "dead / excluded" : row.sustained ? "sustained" : row.moved ? "excursion" : "within noise";
+      tr.appendChild(verdict);
+      body.appendChild(tr);
+    });
+  }
+
+  function responsePoints() {
+    var series = state.series;
+    var index = state.channel;
+    if (!series) return { points: [], relative: false };
+    var relative = !!(series.response && series.response.values && series.response.values[index]);
+    var row = relative ? series.response.values[index] : (series.values ? series.values[index] : null);
+    if (!row) return { points: [], relative: relative };
+    var points = [];
+    for (var i = 0; i < row.length; i++) {
+      var v = row[i];
+      if (!finite(v)) continue;
+      var t = series.time && finite(series.time[i]) ? series.time[i] : i;
+      points.push({ t: t, v: v });
+    }
+    return { points: points, relative: relative };
+  }
+
+  function drawChart() {
+    var canvas = $("liveChart");
+    var empty = $("chartEmpty");
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    var data = responsePoints();
+    var points = data.points;
+    empty.hidden = points.length > 0;
+    empty.textContent = state.series ? "No finite response on this channel yet" : "No live window yet";
+    var rect = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.max(320, Math.round(rect.width || 760));
+    var h = 262;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    if (!points.length) return;
+    var padL = 52, padR = 12, padT = 12, padB = 24;
+    var tMin = points[0].t, tMax = points[points.length - 1].t;
+    var tSpan = Math.max(1e-6, tMax - tMin);
+    var band = state.rows[state.channel] ? state.rows[state.channel].band : null;
+    var vs = points.map(function (p) { return p.v; });
+    var lo = Math.min.apply(null, vs);
+    var hi = Math.max.apply(null, vs);
+    if (band !== null) { lo = Math.min(lo, -band); hi = Math.max(hi, band); }
+    lo = Math.min(lo, 0); hi = Math.max(hi, 0);
+    if (hi - lo < 1e-9) { hi = lo + 0.01; lo -= 0.01; }
+    var pad = (hi - lo) * 0.08;
+    lo -= pad; hi += pad;
+    var span = hi - lo;
+    function x(t) { return padL + (t - tMin) / tSpan * (w - padL - padR); }
+    function y(v) { return padT + (1 - (v - lo) / span) * (h - padT - padB); }
+    if (band !== null) {
+      ctx.fillStyle = "rgba(138,127,108,.14)";
+      var yTop = y(Math.min(hi, band));
+      var yBot = y(Math.max(lo, -band));
+      ctx.fillRect(padL, yTop, w - padL - padR, Math.max(0, yBot - yTop));
+    }
+    ctx.strokeStyle = "rgba(29,26,22,.10)";
+    ctx.lineWidth = 1;
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + (g / 4) * (h - padT - padB);
+      ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(w - padR, gy); ctx.stroke();
+      ctx.fillStyle = "#8a7f6c";
+      ctx.font = "9px ui-monospace, monospace";
+      ctx.fillText(pct(hi - (g / 4) * span, 1), 4, gy + 3);
+    }
+    var y0 = y(0);
+    ctx.strokeStyle = "rgba(29,26,22,.35)";
+    ctx.beginPath(); ctx.moveTo(padL, y0); ctx.lineTo(w - padR, y0); ctx.stroke();
+    var live = state.series && state.series.source === "live";
+    ctx.strokeStyle = live ? "#0e7490" : "#8a7f6c";
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    points.forEach(function (p, i) { if (i === 0) ctx.moveTo(x(p.t), y(p.v)); else ctx.lineTo(x(p.t), y(p.v)); });
+    ctx.stroke();
+    var last = points[points.length - 1];
+    ctx.fillStyle = live ? "#0e7490" : "#8a7f6c";
+    ctx.beginPath(); ctx.arc(x(last.t), y(last.v), 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#6b6152";
+    ctx.font = "9px ui-monospace, monospace";
+    var unit = state.series && state.series.timeUnit === "s" ? "s" : " samples";
+    ctx.fillText("−" + Math.round(tSpan) + unit, padL, h - 6);
+    var endLabel = "now";
+    ctx.fillText(endLabel, Math.max(padL, w - padR - ctx.measureText(endLabel).width), h - 6);
+  }
+
+  function drawSpark(canvasId, values, labelElId) {
+    var canvas = $(canvasId);
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    var rect = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.max(100, Math.round(rect.width || 160));
+    var h = 56;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    var pts = values.filter(function (v) { return finite(v); });
+    if (!pts.length) {
+      ctx.fillStyle = "#8a7f6c"; ctx.font = "8px ui-monospace, monospace";
+      ctx.fillText("no data", 4, h / 2 + 2);
+      return;
+    }
+    var lo = Math.min.apply(null, pts.concat([0]));
+    var hi = Math.max.apply(null, pts.concat([0]));
+    if (hi - lo < 1e-9) { hi = lo + 0.01; }
+    var pad = (hi - lo) * 0.15;
+    lo -= pad; hi += pad;
+    var padL = 4, padR = 4, padT = 4, padB = 10;
+    var n = pts.length;
+    function x(i) { return n === 1 ? (padL + w - padR) / 2 : padL + (i / (n - 1)) * (w - padL - padR); }
+    function y(v) { return padT + (1 - (v - lo) / (hi - lo)) * (h - padT - padB); }
+    ctx.strokeStyle = "rgba(138,127,108,.25)";
+    ctx.beginPath(); ctx.moveTo(padL, y(0)); ctx.lineTo(w - padR, y(0)); ctx.stroke();
+    ctx.strokeStyle = "#0e7490";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    pts.forEach(function (v, i) { if (i === 0) ctx.moveTo(x(i), y(v)); else ctx.lineTo(x(i), y(v)); });
+    ctx.stroke();
+    var last = pts[pts.length - 1];
+    ctx.fillStyle = "#0e7490";
+    ctx.beginPath(); ctx.arc(x(n - 1), y(last), 2.2, 0, Math.PI * 2); ctx.fill();
+    if (labelElId) setText(labelElId, pct(last));
+  }
+
+  function drawSessions() {
+    var canvas = $("sessionChart");
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    var rect = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.max(200, Math.round(rect.width || 320));
+    var h = 64;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    var entries = state.sessions.slice(-24);
+    setText("sessionStamp", state.sessions.length + " session" + (state.sessions.length === 1 ? "" : "s"));
+    if (entries.length < 2) {
+      ctx.fillStyle = "#8a7f6c";
+      ctx.font = "9px ui-monospace, monospace";
+      ctx.fillText(entries.length ? "Save a second session to draw a trend." : "No saved sessions yet.", 6, h / 2 + 3);
+      setText("sessionVs", "No earlier session to compare.");
+      setText("sessionDelta", "—");
+      $("sessionDelta").className = "delta flat";
+      return;
+    }
+    var values = entries.map(function (s) { return finite(s.index) ? s.index : null; });
+    var finiteVals = values.filter(function (v) { return v !== null; });
+    var lo = Math.min.apply(null, finiteVals.concat([0]));
+    var hi = Math.max.apply(null, finiteVals.concat([0]));
+    if (hi - lo < 1e-9) { hi = lo + 0.01; }
+    var pad = (hi - lo) * 0.15;
+    lo -= pad; hi += pad;
+    var padL = 4, padR = 4, padT = 6, padB = 6;
+    function x(i) { return padL + (i / (values.length - 1)) * (w - padL - padR); }
+    function y(v) { return padT + (1 - (v - lo) / (hi - lo)) * (h - padT - padB); }
+    ctx.strokeStyle = "rgba(138,127,108,.25)";
+    ctx.beginPath(); ctx.moveTo(padL, y(0)); ctx.lineTo(w - padR, y(0)); ctx.stroke();
+    ctx.strokeStyle = "#0e7490";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    var started = false;
+    values.forEach(function (v, i) {
+      if (v === null) { started = false; return; }
+      if (!started) { ctx.moveTo(x(i), y(v)); started = true; }
+      else ctx.lineTo(x(i), y(v));
+    });
+    ctx.stroke();
+    ctx.fillStyle = "#0e7490";
+    values.forEach(function (v, i) {
+      if (v === null) return;
+      ctx.beginPath(); ctx.arc(x(i), y(v), 2, 0, Math.PI * 2); ctx.fill();
+    });
+    var last = entries[entries.length - 1];
+    var prev = entries[entries.length - 2];
+    var deltaEl = $("sessionDelta");
+    if (last && prev && finite(last.index) && finite(prev.index)) {
+      var d = last.index - prev.index;
+      setText("sessionVs", "vs " + clockHour(hourOf(prev.at)) + " on " + new Date(prev.at).toLocaleDateString([], { month: "short", day: "numeric" }));
+      setText("sessionDelta", (d >= 0 ? "+" : "") + (d * 100).toFixed(1) + " pp");
+      deltaEl.className = "delta " + (Math.abs(d) < 0.005 ? "flat" : d > 0 ? "up" : "down");
+    }
+  }
+
+  function renderDiurnal() {
+    var d = diurnalStats();
+    setText("diurnalCount", d.count);
+    setText("diurnalMedian", d.median === null ? "—" : pct(d.median));
+    if (d.vsMedian === null) {
+      setText("diurnalVsMedian", "—");
+    } else {
+      setText("diurnalVsMedian", (d.vsMedian >= 0 ? "+" : "") + pct(d.vsMedian));
+    }
+  }
+
+  function renderHistory() {
+    // Up to 4 channels, show their change index history across sessions
+    var grid = $("historyGrid");
+    var cells = [
+      { canvas: "histSpark0", val: "histVal0" },
+      { canvas: "histSpark1", val: "histVal1" },
+      { canvas: "histSpark2", val: "histVal2" },
+      { canvas: "histSpark3", val: "histVal3" }
+    ];
+    cells.forEach(function (cell, ci) {
+      var row = state.rows[ci];
+      var canvas = $(cell.canvas);
+      if (!row) {
+        if (canvas) { var ctx = canvas.getContext("2d"); if (ctx) { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="#8a7f6c"; ctx.font="8px ui-monospace,monospace"; ctx.fillText("no channel",4,28); } }
+        if ($(cell.val)) setText(cell.val, "—");
+        return;
+      }
+      var values = state.sessions.map(function (s) { return s.chans && finite(s.chans[row.id]) ? s.chans[row.id] : null; }).filter(finite);
+      drawSpark(cell.canvas, values, cell.val);
+      var nameEl = $("histName" + ci);
+      if (nameEl) nameEl.textContent = row.label;
+    });
+  }
+
+  function renderLogs(events) {
+    var list = $("journalList");
+    var filtered = state.journalFilter === "all" ? (events || []) : (events || []).filter(function (e) { return e && e.type === state.journalFilter; });
+    setText("journalStamp", filtered.length + (filtered.length === 1 ? " event" : " events"));
+    if (!filtered.length) {
+      list.textContent = "";
+      var empty = document.createElement("div");
+      empty.className = "log-empty";
+      empty.textContent = "No events yet.";
+      list.appendChild(empty);
+      return;
+    }
+    list.textContent = "";
+    filtered.slice().reverse().slice(0, 60).forEach(function (event) {
+      var when = new Date(event.timestamp || Date.now());
+      var row = document.createElement("div");
+      row.className = "journal-row";
+      var t = document.createElement("span");
+      t.className = "t";
+      t.textContent = when.toLocaleDateString([], { month: "short", day: "numeric" }) + " " + when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      var kind = document.createElement("span");
+      kind.className = "kind";
+      kind.textContent = String(event.type || "note");
+      var body = document.createElement("span");
+      body.className = "body";
+      body.textContent = event.message || "";
+      var meta = document.createElement("span");
+      meta.className = "meta";
+      var extra = event.data && typeof event.data === "object" ? event.data : {};
+      var short = extra.kind || extra.plant || (finite(extra.index) ? pct(extra.index) : (event.type === "session" ? "saved" : ""));
+      meta.textContent = short ? String(short) : "—";
+      meta.title = event.data ? JSON.stringify(event.data) : "";
+      row.appendChild(t); row.appendChild(kind); row.appendChild(body); row.appendChild(meta);
+      list.appendChild(row);
+    });
+  }
+
+  function renderInterpretation() {
+    var grid = $("interpretGrid");
+    if (!grid) return;
+    grid.textContent = "";
+    interpretation().forEach(function (item) {
+      var row = document.createElement("div");
+      row.className = "interpret-item " + (item.tone || "info");
+      var label = document.createElement("div");
+      label.className = "label";
+      label.textContent = item.label;
+      var body = document.createElement("div");
+      body.className = "body";
+      body.textContent = item.body;
+      var action = document.createElement("div");
+      action.className = "action";
+      action.textContent = item.action;
+      row.appendChild(label); row.appendChild(body); row.appendChild(action);
+      grid.appendChild(row);
+    });
+  }
+
+  function renderAll() {
+    if (!HOST) {
+      setText("callLabel", "This Vial needs the Osmograph host");
+      setText("callBody", "The VialHost SDK is not present in this frame, so no data is available.");
+      return;
+    }
+    if (!readState()) return;
+    compute();
+    renderStatus();
+    renderVerdict();
+    renderMetrics();
+    renderChannelSelect();
+    renderChannelTable();
+    renderInterpretation();
+    if (!state.paused) drawChart();
+    drawSessions();
+    renderDiurnal();
+    renderHistory();
+    window.requestAnimationFrame(sendResize);
+  }
+
+  async function loadPersisted() {
+    if (!HOST) return;
+    try {
+      var context = await HOST.retrieve("plant-context");
+      if (context && typeof context === "object") {
+        state.context = context;
+        Object.keys(context).forEach(function (key) {
+          var input = document.querySelector('#contextForm [name="' + key + '"]');
+          if (input && context[key] != null) input.value = String(context[key]);
+        });
+      }
+    } catch (e) { /* a session without persist still works */ }
+    try {
+      var sessions = await HOST.retrieve("plant-sessions");
+      state.sessions = Array.isArray(sessions) ? sessions.filter(function (s) { return s && finite(s.index); }) : [];
+    } catch (e) { state.sessions = []; }
+    var watered = document.querySelector('#contextForm [name="watered"]');
+    if (watered && !watered.value) watered.value = today();
+    var careDate = document.querySelector('#careForm [name="date"]');
+    if (careDate && !careDate.value) careDate.value = today();
+    await refreshLogs();
+    drawSessions();
+  }
+
+  async function refreshLogs() {
+    if (!HOST) return;
+    try {
+      var events = await HOST.getEvents(400);
+      state.journal = Array.isArray(events) ? events : [];
+      renderLogs(state.journal);
+    } catch (e) { renderLogs([]); }
+  }
+
+  function saveContext() {
+    if (!HOST) return;
+    var values = {};
+    document.querySelectorAll("#contextForm [name]").forEach(function (input) {
+      if (String(input.value).trim()) values[input.name] = String(input.value).trim();
+    });
+    state.context = values;
+    HOST.persist("plant-context", values)
+      .then(function () { return HOST.logEvent("context", "Plant context saved.", values); })
+      .then(function () { return refreshLogs(); })
+      .catch(function (e) {
+        setText("callBody", "Context could not be saved: " + (e && e.message ? e.message : "unknown"));
+      });
+  }
+
+  function savedSession() {
+    var chans = {};
+    state.rows.forEach(function (row) {
+      if (!row.dead && row.response !== null) chans[row.id] = row.response;
+    });
+    return {
+      at: Date.now(),
+      hour: hourOf(Date.now()),
+      index: state.index,
+      band: state.band,
+      temp: state.env ? state.env.temp : null,
+      rh: state.env ? state.env.rh : null,
+      moved: state.moved,
+      sustained: state.sustained,
+      confounded: state.confounded,
+      source: state.series ? state.series.source : "none",
+      chans: chans,
+      plant: state.context.plant || "",
+      species: state.context.species || "",
+      light: state.context.light || "",
+      note: ""
+    };
+  }
+
+  function saveSession() {
+    if (!HOST) return;
+    if (!state.series || state.index === null) {
+      setText("callBody", "Nothing to save: there is no finite response on a live window yet.");
+      return;
+    }
+    var entry = savedSession();
+    entry.note = state.confounded ? "enclosure confounded" : "";
+    state.sessions = state.sessions.concat([entry]).slice(-60);
+    HOST.persist("plant-sessions", state.sessions)
+      .then(function () {
+        return HOST.logEvent("session", "Session saved: " + (entry.index === null ? "no index" : (entry.index * 100).toFixed(1) + "% change index"), {
+          index: entry.index, band: entry.band, temp: entry.temp, rh: entry.rh,
+          confounded: entry.confounded, source: entry.source
+        });
+      })
+      .then(function () { drawSessions(); renderDiurnal(); renderHistory(); return refreshLogs(); })
+      .catch(function (e) {
+        setText("callBody", "Session could not be saved: " + (e && e.message ? e.message : "unknown"));
+      });
+  }
+
+  function addCare() {
+    if (!HOST) return;
+    var form = $("careForm");
+    var values = {};
+    form.querySelectorAll("[name]").forEach(function (input) {
+      if (String(input.value).trim()) values[input.name] = String(input.value).trim();
+    });
+    if (!values.kind) values.kind = "other";
+    var note = values.note || ("Care event (" + values.kind + ")");
+    values.index = state.index === null ? null : state.index;
+    values.temp = state.env ? state.env.temp : null;
+    values.rh = state.env ? state.env.rh : null;
+    HOST.logEvent("care", note, values)
+      .then(function () { form.querySelector('[name="note"]').value = ""; return refreshLogs(); })
+      .catch(function () { /* the journal is best-effort */ });
+  }
+
+  function exportJournal() {
+    if (!HOST) return;
+    HOST.requestAction("journal-download", { format: "csv" })
+      .catch(function () {
+        return HOST.exportJournal("csv").then(function (text) {
+          var blob = new Blob([text], { type: "text/csv" });
+          var url = URL.createObjectURL(blob);
+          var link = document.createElement("a");
+          link.href = url;
+          link.download = "plant-respiration-journal.csv";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        });
+      })
+      .catch(function (e) {
+        setText("callBody", "Export failed: " + (e && e.message ? e.message : "unknown"));
+      });
+  }
+
+  if (HOST) {
+    HOST.on("tick", scheduleRender);
+    HOST.on("connect", scheduleRender);
+    HOST.on("disconnect", scheduleRender);
+    HOST.on("event", function () { refreshLogs(); });
+    loadPersisted();
+    renderAll();
+    window.setInterval(refreshLogs, 8000);
+  } else {
+    renderAll();
+  }
+
+  $("channelSelect").addEventListener("change", function (event) {
+    state.channel = parseInt(event.target.value, 10) || 0;
+    scheduleRender();
+  });
+  $("windowSelect").addEventListener("change", function (event) {
+    state.windowSec = parseInt(event.target.value, 10) || 180;
+    scheduleRender();
+  });
+  $("pauseBtn").addEventListener("click", function () {
+    state.paused = !state.paused;
+    this.textContent = state.paused ? "Resume chart" : "Pause chart";
+    if (!state.paused) scheduleRender();
+  });
+  $("exportBtn").addEventListener("click", exportJournal);
+  $("saveContext").addEventListener("click", saveContext);
+  $("saveSession").addEventListener("click", saveSession);
+  $("addCare").addEventListener("click", addCare);
+  document.querySelectorAll(".journal-filters [data-filter]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      state.journalFilter = button.dataset.filter || "all";
+      document.querySelectorAll(".journal-filters [data-filter]").forEach(function (other) {
+        other.classList.toggle("active", other === button);
+      });
+      renderLogs(state.journal);
+    });
+  });
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () { if (!state.paused) drawChart(); drawSessions(); sendResize(); }).observe($("liveChart"));
+  }
+})();
+</script>
