@@ -15,10 +15,12 @@ project tests pass; real-rig validation is still outstanding.
 | `ui.html` | The sandboxed workspace body fragment |
 | `home.html` | The compact sandboxed Home view |
 
-The profile is a starting point, not evidence. It compares the host's
-baseline-relative response to each channel's measured noise and withholds the
-call when the enclosure moved. It does not identify ethylene, a pest, a
-pathogen, or a care fault.
+The profile is a starting point, not evidence. The host compiles it into the
+detector: at least two channels must clear their sensitivity-scaled budget, the
+profile's persistence, hysteresis, confidence floor, and coverage gate apply,
+and the call is withheld when the enclosure moved. The workspace's 2×CV band
+explains the channels; it is not a competing detector. This Vial does not
+identify ethylene, a pest, a pathogen, or a care fault.
 
 ## Validate
 

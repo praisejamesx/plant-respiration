@@ -194,7 +194,7 @@
         <div class="metrics">
           <div class="metric"><div class="k">Change index</div><div class="v" id="mIndex">—</div></div>
           <div class="metric"><div class="k">Moved channels</div><div class="v" id="mMoved">—</div></div>
-          <div class="metric"><div class="k">Sustained</div><div class="v" id="mSustained">—</div></div>
+          <div class="metric"><div class="k">Profile detector</div><div class="v" id="mSustained">—</div></div>
           <div class="metric"><div class="k">Noise band</div><div class="v" id="mBand">—</div></div>
           <div class="metric wide" id="envMetric"><div class="k">Enclosure Δ</div><div class="v" id="mEnv" style="font-size:12px;line-height:1.45">—</div></div>
         </div>
@@ -287,6 +287,9 @@
     band: null,
     moved: 0,
     sustained: 0,
+    profileActive: false,
+    profileChannels: [],
+    profileAdmissible: true,
     confounded: false,
     channel: 0,
     windowSec: 180,
@@ -413,6 +416,10 @@
     var sustained = moved.filter(function (r) { return r.sustained; });
     state.moved = moved.length;
     state.sustained = sustained.length;
+    var det = state.snapshot ? state.snapshot.detection : null;
+    state.profileActive = !!(det && det.active);
+    state.profileChannels = det && Array.isArray(det.triggeredChannels) ? det.triggeredChannels : [];
+    state.profileAdmissible = !det || det.admissible !== false;
     state.index = media(live.map(function (r) { return r.response === null ? null : Math.abs(r.response); }).filter(function (v) { return v !== null; }));
     state.band = media(live.map(function (r) { return r.band; }).filter(function (v) { return v !== null; }));
     state.env = envWindow(state.windowSec);
@@ -497,17 +504,25 @@
         action: "Stabilise the enclosure and re-take the window before drawing a conclusion."
       };
     }
+    if (state.profileActive) {
+      var activeChannels = state.profileChannels.length || state.sustained;
+      return {
+        tone: "warn", label: "Profile change on " + activeChannels + " channel" + (activeChannels === 1 ? "" : "s"),
+        body: "The Vial's declared profile detector found a sustained change on this array. The per-channel noise band explains which channels moved; it is not a second, competing detector. A change is not a cause.",
+        action: "Inspect the plant: water, light, leaf undersides, roots, and any recent move. Log what you find before changing care."
+      };
+    }
     if (state.sustained > 0) {
       return {
-        tone: "warn", label: "Sustained change on " + state.sustained + " channel" + (state.sustained === 1 ? "" : "s"),
-        body: "The response stayed beyond each channel's own noise band for most of the recent window, on a live array with a ready baseline. That is a real change on this array; it is not a cause.",
-        action: "Inspect the plant: water, light, leaf undersides, roots, and any recent move. Log what you find before changing care."
+        tone: "", label: "Noise band moved — profile not confirmed",
+        body: "At least one channel moved beyond its own noise band, but the Vial's profile detector has not confirmed a sustained change. Treat this window as an excursion, not a change call.",
+        action: "Watch the next window. Do not change care on one window."
       };
     }
     if (state.moved > 0) {
       return {
         tone: "", label: "One excursion, not sustained",
-        body: "At least one channel crossed its noise band, but not for most of the window. A single excursion is usually handling, a door, or a draft.",
+        body: "At least one channel crossed its noise band, but not for most of the window and not with profile confirmation. A single excursion is usually handling, a door, or a draft.",
         action: "Watch the next window. Do not change care on one excursion."
       };
     }
@@ -518,14 +533,16 @@
     };
   }
 
-  // Interpretation: likely causes for sustained change
+  // Interpretation: what the host profile and the explanatory noise band say.
   function interpretation() {
     var items = [];
-    if (state.sustained > 0) {
+    var diurnal = diurnalStats();
+    if (state.profileActive) {
+      var activeChannels = state.profileChannels.length || state.sustained;
       items.push({
         tone: "warn",
-        label: "Sustained change on this array",
-        body: state.sustained + " channel" + (state.sustained === 1 ? "" : "s") + " held beyond its own noise band for most of the window.",
+        label: "Profile change on this array",
+        body: activeChannels + " channel" + (activeChannels === 1 ? "" : "s") + " cleared the Vial profile's sustained-change gate. The noise band explains the channels; it does not replace the detector.",
         action: "Inspect water, light, leaf undersides, roots, and any recent move before changing care."
       });
       if (state.confounded) {
@@ -536,7 +553,6 @@
           action: "Stabilise the enclosure and re-take the window."
         });
       }
-      var diurnal = diurnalStats();
       if (diurnal.count > 0) {
         items.push({
           tone: diurnal.vsMedian !== null && Math.abs(diurnal.vsMedian) > (state.band || 0) ? "warn" : "info",
@@ -552,11 +568,18 @@
           action: "Save sessions at the same time of day to build a diurnal baseline."
         });
       }
+    } else if (state.sustained > 0) {
+      items.push({
+        tone: "info",
+        label: "Noise band moved, not confirmed",
+        body: state.sustained + " channel" + (state.sustained === 1 ? "" : "s") + " moved beyond its own noise band, but the Vial profile did not confirm a sustained change.",
+        action: "Watch the next window. Do not change care on one window."
+      });
     } else {
       items.push({
         tone: "info",
         label: "No change detected",
-        body: "No live channel is beyond twice its measured coefficient of variation, sustained.",
+        body: "The Vial profile has not confirmed a change on this array, and no live channel is beyond twice its measured coefficient of variation, sustained.",
         action: "Keep the routine. A quiet array does not clear a plant with visible symptoms — inspect those directly."
       });
     }
@@ -598,7 +621,9 @@
   function renderMetrics() {
     setText("mIndex", state.index === null ? "—" : pct(state.index));
     setText("mMoved", state.rows.length ? state.moved + "/" + state.rows.filter(function (r) { return !r.dead; }).length : "—");
-    setText("mSustained", state.rows.length ? String(state.sustained) : "—");
+    setText("mSustained", state.snapshot && state.snapshot.detection
+      ? (state.profileActive ? "ACTIVE" : "quiet")
+      : "—");
     setText("mBand", state.band === null ? "—" : pct(state.band));
     var env = state.env || {};
     var bits = [];
@@ -1109,6 +1134,10 @@
       .catch(function (e) {
         setText("callBody", "Export failed: " + (e && e.message ? e.message : "unknown"));
       });
+  }
+
+  if (bridge && typeof bridge.onData === "function") {
+    bridge.onData(function () { scheduleRender(); });
   }
 
   if (HOST) {

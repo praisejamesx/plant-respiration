@@ -302,8 +302,8 @@
       "title": "How the change call is made",
       "body": [
         "The host applies the profile’s baseline and response transform. The workspace reads the baseline-relative response (value minus R0, over R0) from the host and never recomputes a hidden baseline of its own.",
-        "For every live channel it compares the response to twice that channel’s coefficient of variation over the raw window. A response inside that band is not evidence of a change; a response outside it is a change on this array.",
-        "A change is called only when it holds for most of the recent window. One excursion is treated as handling, a door, or a draft.",
+        "The Vial’s declared profile is the detector. The host requires at least two channels to clear their sensitivity-scaled budget on the same sample, applies the profile’s 90 s warning persistence and 25% hysteresis, and refuses to arm when the baseline is not ready or channel coverage is below 80%. The profile’s 0.6 confidence floor also applies to the final call.",
+        "The workspace’s twice-CV band is an explanation of channel noise, not a second detector. A response outside that band is shown as an excursion; it becomes a change call only when the profile detector confirms a sustained change.",
         "If temperature moved 1.5 °C or more, or humidity moved 5 %RH or more, during the window, the change call is withheld. A MOX response is temperature- and humidity-sensitive, so the change cannot be attributed to the plant."
       ]
     },
@@ -341,9 +341,9 @@
       "id": "profile",
       "title": "The profile is a starting point, not evidence",
       "body": [
-        "The declared profile uses a 180 s warmup, a 60 s R0 window, a three-sample median, delta-over-R0 response, and a 90 s warning persistence with 25% hysteresis. Those values are reasoned defaults for a slow plant process on a small MOX array.",
-        "They have not been measured against a held-out plant dataset. The Vial therefore installs as Ungated and is not listed as reviewed evidence.",
-        "If you collect a held-out report, add it to the evidence block. Do not describe these defaults as validated numbers."
+        "The declared profile uses a 180 s warmup, a 60 s R0 window, a three-sample median, delta-over-R0 response, a two-channel corroboration floor, and a 90 s warning persistence with 25% hysteresis. Those values are reasoned defaults for a slow plant process on a small MOX array.",
+        "The host now enforces the corroboration floor, the confidence floor, and the coverage gate on the live path. That is a contract fix, not held-out evidence: these defaults have not been measured against a plant dataset.",
+        "The Vial therefore installs as Ungated and is not listed as reviewed evidence. If you collect a held-out report, add it to the evidence block. Do not describe these defaults as validated numbers."
       ]
     },
     {
