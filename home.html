@@ -395,9 +395,12 @@
     } else if (detection && detection.active) {
       setPill("watchPill", "CHANGE WATCH", "warn");
       setText("watchNote", "Triggered: " + (detection.triggeredChannels || []).join(", ") + ". Inspect the plant; this is an array deviation, not a diagnosis.");
+    } else if (baseline.state === "ready" && !detection) {
+      setPill("watchPill", "PROFILE PENDING", "");
+      setText("watchNote", "The baseline is ready, but the host has not produced a profile verdict yet. The 2×CV band explains the channels; it is not a change call.");
     } else if (baseline.state === "ready") {
-      setPill("watchPill", "WATCH ON", "good");
-      setText("watchNote", "The profile is armed from the manifest. The 2×CV band explains the channels; the profile detector is the change call. Neither can be edited here.");
+      setPill("watchPill", "PROFILE ARMED", "good");
+      setText("watchNote", "The profile has a verdict for this window. The 2×CV band explains the channels; the profile detector is the change call. Neither can be edited here.");
     } else {
       setPill("watchPill", "BASELINE " + String(baseline.state).toUpperCase(), "");
       setText("watchNote", "The profile will not call a change until the baseline is ready.");

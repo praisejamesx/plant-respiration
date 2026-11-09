@@ -487,7 +487,14 @@
     if (state.index === null) {
       return { tone: "", label: "No response yet", body: "The profile transform has not produced a finite response on any live channel.", action: "Wait for one more window, or check that the profile transform is being applied." };
     }
-    if (snapshot.detection && snapshot.detection.admissible === false) {
+    if (!snapshot.detection) {
+      return {
+        tone: "", label: "Profile pending — no verdict yet",
+        body: "The baseline is ready, but the host has not produced a Vial-profile verdict for this window. The noise band explains which channels moved; it is not the change call.",
+        action: "Keep the enclosure steady and let the profile report. Do not read a quiet band as a quiet plant until the profile has a verdict."
+      };
+    }
+    if (snapshot.detection.admissible === false) {
       return {
         tone: "warn", label: "Detector not admissible",
         body: snapshot.detection.reason || "The profile refuses to arm: the baseline or channel coverage is outside its declared gate.",
@@ -537,7 +544,15 @@
   function interpretation() {
     var items = [];
     var diurnal = diurnalStats();
-    if (state.profileActive) {
+    var detection = state.snapshot && state.snapshot.detection;
+    if (!detection) {
+      items.push({
+        tone: "info",
+        label: "Profile pending",
+        body: "The host has not produced a profile verdict yet. The 2×CV band explains channel movement; it is not the change call.",
+        action: "Keep the enclosure steady and let the profile report before changing care."
+      });
+    } else if (state.profileActive) {
       var activeChannels = state.profileChannels.length || state.sustained;
       items.push({
         tone: "warn",
@@ -578,8 +593,8 @@
     } else {
       items.push({
         tone: "info",
-        label: "No change detected",
-        body: "The Vial profile has not confirmed a change on this array, and no live channel is beyond twice its measured coefficient of variation, sustained.",
+        label: "No sustained change",
+        body: "The Vial profile has a verdict and has not confirmed a change on this array, and no live channel is beyond twice its measured coefficient of variation, sustained.",
         action: "Keep the routine. A quiet array does not clear a plant with visible symptoms — inspect those directly."
       });
     }
@@ -623,7 +638,7 @@
     setText("mMoved", state.rows.length ? state.moved + "/" + state.rows.filter(function (r) { return !r.dead; }).length : "—");
     setText("mSustained", state.snapshot && state.snapshot.detection
       ? (state.profileActive ? "ACTIVE" : "quiet")
-      : "—");
+      : "pending");
     setText("mBand", state.band === null ? "—" : pct(state.band));
     var env = state.env || {};
     var bits = [];
